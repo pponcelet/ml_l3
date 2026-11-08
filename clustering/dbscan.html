@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>DBSCAN — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../" class="db-page">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">CLUSTERING · DENSITÉ</div>
+<h1>DBSCAN</h1>
+<p class="lead">Identifier des groupes par densité et distinguer les observations isolées, sans fixer à l'avance le nombre de groupes.</p>
+
+<h2>1. Principe</h2>
+<p>DBSCAN (<em>Density-Based Spatial Clustering of Applications with Noise</em>) part de l'idée qu'un groupe correspond à une région suffisamment dense de l'espace. Une observation située dans une région dense peut en entraîner d'autres dans le même groupe, de proche en proche, même lorsque celui-ci possède une forme complexe.</p>
+<p>DBSCAN ne demande pas de choisir K, contrairement à K-means. Il a néanmoins besoin de deux paramètres qui définissent ce que signifie « région dense ».</p>
+
+<h2>2. Paramètres et types d'observations</h2>
+<div class="concept-grid">
+  <div class="concept"><strong>ε (epsilon)</strong><p>Rayon du voisinage autour d'une observation. Deux observations sont voisines lorsque leur distance euclidienne est inférieure ou égale à ε.</p></div>
+  <div class="concept"><strong>MinPts</strong><p>Nombre minimal d'observations du voisinage, <strong>observation centrale comprise</strong>, pour considérer cette observation comme un point cœur.</p></div>
+</div>
+<div class="concept-grid">
+  <div class="concept"><strong>Point cœur</strong><p>Possède au moins MinPts observations dans son voisinage ε, lui-même compris. Il permet la propagation d'un groupe.</p></div>
+  <div class="concept"><strong>Point de bord</strong><p>N'est pas cœur, mais se trouve dans le voisinage d'un point cœur appartenant à un groupe.</p></div>
+  <div class="concept"><strong>Bruit</strong><p>N'est finalement rattaché à aucun groupe. Un point peut d'abord être considéré comme bruit, puis être récupéré comme point de bord.</p></div>
+</div>
+
+<h2>3. Algorithme général</h2>
+<div class="algorithm"><ol>
+<li>Pour chaque observation, déterminez le voisinage de rayon ε et repérez les points cœur (au moins MinPts voisins, observation comprise).</li>
+<li>Choisissez une observation non visitée. Si elle n'est pas cœur, marquez-la provisoirement comme bruit.</li>
+<li>Si elle est cœur, créez un nouveau groupe et ajoutez ses voisins.</li>
+<li>Pour chaque nouveau point cœur rencontré, ajoutez également ses voisins au groupe ; les points de bord sont rattachés sans propager la recherche.</li>
+<li>Recommencez avec les observations restantes, jusqu'à ce qu'elles aient toutes été examinées.</li>
+</ol><pre>Entrées : données X, rayon ε, seuil MinPts
+Pour chaque observation p non visitée :
+    visiter p et calculer Nε(p)
+    si |Nε(p)| &lt; MinPts :
+        étiqueter provisoirement p comme bruit
+    sinon :
+        créer un groupe C
+        explorer les voisins accessibles depuis p
+        pour chaque point cœur rencontré : étendre C
+        rattacher les points de bord à C
+Retourner les groupes et les points de bruit</pre></div>
+
+<h2>4. Expérimentation</h2>
+<p>Faites varier <strong>ε</strong> et <strong>MinPts</strong>, puis lancez le parcours automatique. Chaque jeu de données propose une valeur initiale de ε, que vous pouvez modifier librement. À gauche, observez la formation des groupes. À droite, examinez le voisinage du point courant : le cercle matérialise le rayon ε, et le nombre de points dans ce cercle détermine s'il est cœur.</p>
+<div class="lab" id="db-lab">
+  <div class="lab-head"><strong>Exploration et propagation de DBSCAN</strong><span class="small">Distance euclidienne</span></div>
+  <div class="db-controls">
+    <label>Jeu de données
+      <select id="db-dataset">
+        <option value="moons" selected>Deux lunes</option>
+        <option value="circles">Cercles concentriques</option>
+        <option value="blobs">Groupes compacts</option>
+        <option value="elongated">Groupes allongés</option>
+        <option value="varying">Densités différentes</option>
+        <option value="noise">Groupes avec bruit</option>
+      </select>
+    </label>
+    <label>Rayon ε = <output id="db-eps-value">6,5</output>
+      <input id="db-eps" type="range" min="2" max="18" step="0.5" value="6.5">
+    </label>
+    <label>MinPts = <output id="db-minpts-value">5</output>
+      <input id="db-minpts" type="range" min="2" max="12" step="1" value="5">
+    </label>
+    <label>Vitesse
+      <select id="db-speed"><option value="350">Lente</option><option value="150" selected>Normale</option><option value="55">Rapide</option></select>
+    </label>
+  </div>
+  <div class="actions db-actions">
+    <button id="db-play" type="button" class="btn primary">Lancer</button>
+    <button id="db-next" type="button" class="btn secondary">Étape suivante</button>
+    <button id="db-end" type="button" class="btn secondary">Voir le résultat</button>
+    <button id="db-reset" type="button" class="btn ghost">Recommencer</button>
+  </div>
+  <div class="db-figures">
+    <section class="db-figure">
+      <h3>Formation des groupes</h3>
+      <div id="db-plot" class="chart" aria-label="Nuage de points et groupes DBSCAN"></div>
+    </section>
+    <section class="db-figure">
+      <h3>Voisinage du point examiné</h3>
+      <div id="db-neighborhood" class="chart" aria-label="Vue agrandie du voisinage epsilon"></div>
+    </section>
+  </div>
+  <div class="db-legend" aria-label="Légende de la simulation">
+    <span><i class="db-key db-key-core"></i> Point cœur (couleur du groupe)</span>
+    <span><i class="db-key db-key-border"></i> Point de bord</span>
+    <span><i class="db-key db-key-noise"></i> Bruit</span>
+    <span><i class="db-key db-key-pending"></i> Non exploré</span>
+    <span><i class="db-key db-key-current"></i> Point examiné</span>
+  </div>
+  <div class="db-neighborhood-stats">
+    <span><strong id="db-point">—</strong></span>
+    <span>Voisins dans ε : <strong id="db-neighbor-count">—</strong></span>
+    <span>Statut : <strong id="db-point-type">En attente</strong></span>
+  </div>
+  <div class="stats db-stats">
+    <div><span>Groupes découverts</span><strong id="db-groups">0</strong></div>
+    <div><span>Observations visitées</span><strong id="db-visited">0</strong></div>
+    <div><span>Cœurs explorés</span><strong id="db-core-count">0</strong></div>
+    <div><span>Points de bord</span><strong id="db-border-count">0</strong></div>
+    <div><span>Bruit provisoire / final</span><strong id="db-noise-count">0</strong></div>
+  </div>
+  <div class="db-timeline"><label for="db-progress">Parcourir les étapes</label><input id="db-progress" type="range" min="0" max="1" value="0"><output id="db-progress-value">0 / 0</output></div>
+  <p id="db-message" class="lab-help db-message" aria-live="polite">Chargement…</p>
+  <p id="db-finished-note" class="small db-caveat"></p>
+  <p class="lab-help">Le voisinage ε inclut toujours le point examiné lui-même.</p>
+  
+</div>
+<div class="note"><strong>À observer :</strong> augmentez ε : les points ont davantage de voisins, ce qui peut réunir plusieurs groupes. Augmentez ensuite MinPts : certains points cœur peuvent devenir points de bord ou bruit. Qu'observez-vous pour les deux lunes et pour des densités différentes ?</div>
+
+<h2>5. Influence des paramètres</h2>
+<p><strong>Un ε trop petit</strong> risque de fragmenter les groupes et d'augmenter le bruit ; <strong>un ε trop grand</strong> peut réunir des régions distinctes. Avec <strong>MinPts</strong>, vous contrôlez le seuil de densité : un seuil élevé demande un voisinage plus peuplé pour qu'une observation puisse étendre un groupe.</p>
+<p>Les valeurs de ε dépendent des unités et des distances utilisées. Une standardisation des variables peut donc modifier sensiblement les regroupements. <a href="../fondamentaux/pretraitement.html">Voir la page Normalisation et standardisation.</a></p>
+<p>Dans DBSCAN, le nombre de groupes est une <strong>conséquence des paramètres et de la géométrie des données</strong>, non un nombre fixé à l'avance. Vous pouvez retrouver les mêmes distributions dans la page <a href="comparaison.html?algo=dbscan">Comparer les algorithmes</a>.</p>
+
+<h2>6. Avantages et limites</h2>
+<div class="proscons"><div><h3>Avantages</h3><ul><li>Ne nécessite pas de fixer K.</li><li>Peut découvrir des groupes non convexes.</li><li>Identifie explicitement les observations de bruit.</li></ul></div><div><h3>Limites</h3><ul><li>Choix parfois délicat de ε et MinPts.</li><li>Peut échouer en présence de densités très différentes.</li><li>Sensible aux distances, aux échelles des variables et à la grande dimension.</li></ul></div></div>
+
+<h2>7. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi DBSCAN peut-il retrouver des groupes en forme de croissant ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>DBSCAN étend un groupe à partir de points cœur voisins. La propagation suit ainsi les zones denses, même lorsqu&#x27;elles sont courbes ou non convexes ; le groupe n&#x27;a pas besoin d&#x27;être centré autour d&#x27;une moyenne.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Que se passe-t-il si le rayon ε est trop petit ou trop grand ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Avec un rayon trop petit, les voisinages deviennent peu peuplés : on obtient souvent beaucoup de bruit ou plusieurs petits groupes. Avec un rayon trop grand, des zones distinctes peuvent être reliées et fusionner.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Un point de bord peut-il lui-même étendre un groupe ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Non. Un point de bord peut être rattaché à un groupe lorsqu&#x27;il est voisin d&#x27;un point cœur, mais il ne remplit pas la condition MinPts. La propagation est assurée par les points cœur.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content">
+<h3>Exemple : voisinages et densité</h3>
+<p>Considérons six observations situées sur un même axe, de coordonnée verticale nulle :</p>
+<div class="comparison-table"><table>
+  <thead><tr><th>Observation</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+  <tbody><tr><th>Coordonnées (x, y)</th><td>(0, 0)</td><td>(1, 0)</td><td>(2, 0)</td><td>(8, 0)</td><td>(9, 0)</td><td>(10, 0)</td></tr></tbody>
+</table></div>
+
+<p>Utilisons la <strong>distance euclidienne</strong>, un rayon <span class="math">ε = 1,1</span> et <span class="math">MinPts = 3</span>. Comme dans l’animation, <strong>le point lui-même compte</strong> dans son voisinage.</p>
+<h3>1. Définir le voisinage ε</h3>
+<p>Pour une observation <span class="math">p</span>, son voisinage contient toutes les observations dont la distance à p est inférieure ou égale à ε :</p>
+<p class="math" style="text-align:center;font-size:17px">N<sub>ε</sub>(p) = {q ∈ X : d(p,q) ≤ ε}</p>
+<p>Pour B, situé en <span class="math">(1,0)</span>, on trouve <span class="math">d(B,A)=1</span>, <span class="math">d(B,B)=0</span> et <span class="math">d(B,C)=1</span>. Tous les autres points sont à une distance supérieure à 1,1 :</p>
+<p class="math" style="text-align:center;font-size:17px"><strong>N<sub>1,1</sub>(B) = {A, B, C} &nbsp; ; &nbsp; |N<sub>1,1</sub>(B)| = 3</strong></p>
+<h3>2. Distinguer points cœur, points de bord et bruit</h3>
+<p>Un point p est <strong>cœur</strong> si <span class="math">|N<sub>ε</sub>(p)| ≥ MinPts</span>. Sinon, il peut encore être un <strong>point de bord</strong> s’il se trouve dans le voisinage d’un point cœur.</p>
+<div class="comparison-table"><table>
+<thead><tr><th>Observation</th><th>Voisinage avec ε = 1,1</th><th>Effectif</th><th>Statut</th></tr></thead>
+<tbody>
+<tr><td>A</td><td>{A, B}</td><td>2</td><td>Bord (voisin de B)</td></tr>
+<tr><td>B</td><td>{A, B, C}</td><td>3</td><td><strong>Cœur</strong></td></tr>
+<tr><td>C</td><td>{B, C}</td><td>2</td><td>Bord (voisin de B)</td></tr>
+<tr><td>D</td><td>{D, E}</td><td>2</td><td>Bord (voisin de E)</td></tr>
+<tr><td>E</td><td>{D, E, F}</td><td>3</td><td><strong>Cœur</strong></td></tr>
+<tr><td>F</td><td>{E, F}</td><td>2</td><td>Bord (voisin de E)</td></tr>
+</tbody></table></div>
+<p>DBSCAN découvre donc <strong>deux groupes</strong>, <span class="math">{A,B,C}</span> et <span class="math">{D,E,F}</span>, sans devoir spécifier <span class="math">K = 2</span> à l’avance. Aucun point n’est classé comme bruit dans cet exemple.</p>
+<h3>3. Formaliser la propagation d'un groupe</h3>
+<p>Une observation <span class="math">q</span> est <strong>directement densité-accessible depuis p</strong> si <span class="math">p</span> est un point cœur et si <span class="math">q ∈ N<sub>ε</sub>(p)</span>. La densité-accessibilité se construit par une chaîne de tels déplacements.</p>
+<p>Dans notre exemple, A est directement densité-accessible <strong>depuis B</strong>, car B est cœur et A est son voisin. En revanche, B n’est pas directement densité-accessible depuis A, car A n’est pas cœur. La relation n’est donc <strong>pas toujours symétrique</strong>.</p>
+<p>Deux points sont dits <strong>densité-connectés</strong> lorsqu’ils peuvent être atteints depuis un même point par des chaînes de densité-accessibilité. Cela explique comment DBSCAN peut former des groupes de forme non sphérique.</p>
+<h3>4. Comprendre l’effet des paramètres</h3>
+<p>Si l’on conserve <span class="math">ε = 1,1</span> mais que l’on passe à <span class="math">MinPts = 4</span>, aucun voisinage ne contient assez de points pour former un cœur : les six observations deviennent alors du bruit.</p>
+<p>Le nombre de groupes découle donc du choix de <span class="math">ε</span>, de <span class="math">MinPts</span> et de la distribution des observations. Un point de bord atteignable depuis plusieurs groupes peut être affecté différemment selon l’ordre d’exploration.</p>
+<p>La recherche de tous les voisinages par comparaison de chaque paire d’observations nécessite <span class="math">O(n²)</span> calculs de distance. Des structures d’indexation peuvent réduire ce coût dans certaines situations.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://www.cs.sfu.ca/~ester/papers/kdd_96.pdf" target="_blank" rel="noopener">Ester, Kriegel, Sander et Xu (1996), <em>A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise</em></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/clustering.html#dbscan" target="_blank" rel="noopener">scikit-learn, <em>DBSCAN</em> : principes, paramètres et limites.</a></li>
+<li><a href="https://doi.org/10.1145/3068335" target="_blank" rel="noopener">Schubert et al. (2017), <em>DBSCAN Revisited, Revisited</em>.</a></li>
+</ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/dbscan-loader.js"></script>
+</body>
+</html>

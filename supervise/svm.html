@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Machines à vecteurs de support (SVM) — Apprentissage automatique</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-root="../" class="sup-algo-page"><aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside><main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">APPRENTISSAGE SUPERVISÉ · CLASSIFICATION</div><h1>Machines à vecteurs de support (SVM)</h1>
+<p class="lead">Séparer les classes par une frontière de décision en recherchant une marge aussi grande que possible.</p>
+<h2>1. Principe</h2><p>Un SVM recherche une frontière qui sépare les classes tout en favorisant une <strong>grande marge</strong> autour de cette frontière. Certaines observations proches de la frontière, appelées <strong>vecteurs de support</strong>, jouent un rôle déterminant dans la solution.</p>
+<p>Lorsque les classes ne peuvent pas être correctement séparées par une droite, un <strong>noyau</strong> peut permettre de construire une frontière non linéaire. Le paramètre <span class="math">C</span> règle le compromis entre largeur de la marge et erreurs ou violations de la marge.</p>
+<h2>2. Algorithme général</h2><div class="algorithm"><ol><li>Préparez les variables et, en général, mettez-les à une échelle comparable.</li><li>Choisissez un noyau et le paramètre de régularisation <span class="math">C</span>.</li><li>Recherchez la frontière qui maximise la marge tout en pénalisant les violations de cette marge.</li><li>Utilisez la fonction de décision obtenue pour classer de nouvelles observations.</li></ol></div>
+<h2>3. Expérimentation</h2><p>Comparez un noyau linéaire et un noyau RBF. Faites varier <span class="math">C</span> et, pour le noyau RBF, <span class="math">γ</span>, puis observez la forme de la frontière et les vecteurs de support.</p>
+<div class="lab sup-lab" id="svm-lab"><div class="sup-controls">
+<label for="svm-dataset">Jeu de données<select id="svm-dataset"><option value="blobs">Deux groupes</option><option value="moons">Deux lunes</option><option value="circles">Cercles concentriques</option></select></label>
+<label for="svm-kernel">Noyau<select id="svm-kernel"><option value="linear">Linéaire</option><option value="rbf">RBF (gaussien)</option></select></label>
+<label for="svm-c">Régularisation C <output id="svm-c-value">1,0</output><input type="range" id="svm-c" min="0.2" max="5" step="0.2" value="1"></label>
+<label for="svm-gamma">Paramètre γ <output id="svm-gamma-value">1,0</output><input type="range" id="svm-gamma" min="0.1" max="5" step="0.1" value="1"></label>
+<div class="sup-control-button"><button class="btn secondary" type="button" id="svm-seed">Nouvelles observations</button></div></div>
+<div class="sup-single"><section class="sup-card"><h3>Frontière de décision et vecteurs de support</h3><div class="chart" id="svm-plot"></div></section><div class="sup-explain"><strong>À observer</strong><p id="svm-insight"></p><p>Les contours foncés entourent les vecteurs de support. Les couleurs pâles représentent les zones prédites.</p><p>Essayez les deux lunes, puis les cercles concentriques : une droite ne suffit pas toujours à séparer les classes.</p></div></div>
+<div class="stats"><div><span>Vecteurs de support</span><strong id="svm-support">—</strong></div><div><span>Exactitude sur l'entraînement</span><strong id="svm-accuracy">—</strong></div></div></div>
+<h2>4. Avantages et limites</h2><div class="proscons"><div><h3>Avantages</h3><ul><li>Recherche une frontière avec une marge contrôlée.</li><li>Peut modéliser des frontières non linéaires grâce aux noyaux.</li><li>Souvent performant pour des données de dimension élevée.</li></ul></div><div><h3>Limites</h3><ul><li>Sensible à la mise à l'échelle et aux hyperparamètres.</li><li>Choisir un noyau adapté peut demander une validation rigoureuse.</li><li>Peut devenir coûteux sur de très grands jeux de données.</li></ul></div></div>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi certains points sont-ils appelés vecteurs de support ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Ils se trouvent sur la marge, à l&#x27;intérieur de celle-ci ou du mauvais côté, selon le cas. Leur position influence directement la frontière obtenue ; les observations très éloignées contribuent généralement moins à sa détermination.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Pourquoi un noyau linéaire peut-il échouer sur deux lunes ou des cercles concentriques ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Ces classes ne sont pas séparables par une simple droite dans le plan initial. Un noyau RBF permet une frontière non linéaire qui peut mieux suivre leur forme, à condition de bien régler ses paramètres.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Que se passe-t-il lorsque C devient très grand ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Le modèle pénalise davantage les violations de marge et les erreurs d&#x27;entraînement. Il peut alors chercher une frontière plus ajustée aux données, parfois au prix d&#x27;une marge réduite ou d&#x27;une sensibilité accrue au bruit.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content as-formal">
+<h3>Frontière et marge</h3><p>Pour une classification binaire, on code les étiquettes <span class="math">y<sub>i</sub> ∈ {−1, +1}</span>. Un SVM linéaire utilise une fonction de décision <span class="math">f(x) = wᵀx + b</span>. La prédiction dépend du signe de <span class="math">f(x)</span>.</p>
+<p>Avec un séparateur <span class="math">f(x) = x₁ − 3</span>, les observations <span class="math">A = (1, 2)</span> et <span class="math">B = (5, 2)</span> donnent :</p>
+<div class="as-formula">f(A) = 1 − 3 = −2 → classe −1</div><div class="as-formula">f(B) = 5 − 3 = 2 → classe +1</div>
+<p>La frontière <span class="math">f(x) = 0</span> est ici la droite <span class="math">x₁ = 3</span>. Les droites <span class="math">f(x) = −1</span> et <span class="math">f(x) = +1</span> délimitent les marges canoniques.</p>
+<h3>Optimisation à marge souple</h3><p>Le SVM minimise la norme de <span class="math">w</span> tout en autorisant des violations de marge mesurées par des variables <span class="math">ξ<sub>i</sub> ≥ 0</span> :</p>
+<div class="as-formula">min<sub>w,b,ξ</sub> ½ ‖w‖² + C Σ<sub>i=1…n</sub> ξ<sub>i</sub></div>
+<p>sous les contraintes <span class="math">y<sub>i</sub>(wᵀx<sub>i</sub> + b) ≥ 1 − ξ<sub>i</sub></span>. Pour notre séparateur, <span class="math">w = (1, 0)</span> : sa marge géométrique canonique vaut <span class="math">2/‖w‖ = 2</span>.</p>
+<h3>Noyau RBF</h3><p>Un noyau permet de mesurer des similarités sans construire explicitement toutes les nouvelles variables :</p>
+<div class="as-formula">K(x, z) = exp(−γ ‖x − z‖²)</div>
+<p>Par exemple, si <span class="math">x = (1, 2)</span>, <span class="math">z = (2, 2)</span> et <span class="math">γ = 1</span>, alors <span class="math">‖x − z‖² = 1</span> et <span class="math">K(x, z) = e⁻¹ ≈ 0,368</span>.</p>
+<p>La fonction de décision s'écrit alors <span class="math">f(x) = Σ<sub>i∈SV</sub> α<sub>i</sub>y<sub>i</sub>K(x<sub>i</sub>,x) + b</span>. Seules les observations ayant <span class="math">α<sub>i</sub> &gt; 0</span> interviennent dans cette somme : ce sont les vecteurs de support.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol><li>Cortes et Vapnik (1995), <a href="https://doi.org/10.1007/BF00994018" target="_blank" rel="noopener"><i>Support-Vector Networks</i></a>.</li><li><a href="https://scikit-learn.org/stable/modules/svm.html" target="_blank" rel="noopener">scikit-learn, <i>Support Vector Machines</i></a>.</li></ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main><script src="../assets/js/site.js"></script><script src="../assets/js/supervised-viz.js"></script></body></html>

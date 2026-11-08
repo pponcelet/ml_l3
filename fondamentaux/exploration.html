@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Décrire et explorer un jeu de données — Apprentissage automatique</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="fond-page eda-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+  <div class="eyebrow">FONDAMENTAUX</div>
+  <h1>Décrire et explorer un jeu de données</h1>
+  <p class="lead">Résumer les observations, visualiser les distributions et rechercher des relations entre variables avant de choisir un modèle.</p>
+
+  <h2>1. Pourquoi explorer les données ?</h2>
+  <p>Avant de construire un modèle, on examine les valeurs typiques, la dispersion, les observations atypiques et les relations entre variables. Cette première analyse aide à repérer les difficultés éventuelles et à formuler des hypothèses à vérifier ensuite.</p>
+
+  <h2>2. Statistiques descriptives</h2>
+  <p>Pour une variable numérique, la <strong>moyenne</strong> et la <strong>médiane</strong> renseignent sur les valeurs centrales. Les <strong>quartiles</strong> et l’<strong>écart-type</strong> décrivent la dispersion. Pour une variable catégorielle, on étudie les <strong>effectifs</strong> et les <strong>fréquences</strong> des modalités.</p>
+  <p>Une moyenne peut être fortement influencée par quelques valeurs extrêmes ; la médiane y est généralement moins sensible. Il est donc utile de confronter plusieurs indicateurs. Les quartiles peuvent légèrement varier selon la convention de calcul retenue.</p>
+
+  <h2>3. Étudier une distribution</h2>
+  <p>Un <strong>histogramme</strong> répartit les observations en intervalles de valeurs. Il permet d’examiner la concentration des observations, l’asymétrie, la présence de plusieurs modes et d’éventuelles valeurs isolées. L’apparence dépend du nombre et de la largeur des intervalles.</p>
+<p>Pour une <strong>variable catégorielle</strong>, on privilégie un <strong>diagramme en barres</strong> : chaque modalité possède un effectif et une fréquence, sans continuité numérique entre les modalités.</p>
+
+  <h2>4. Comparer les groupes avec des boxplots</h2>
+  <p>Un <strong>boxplot</strong> résume une distribution par sa médiane et ses quartiles. La boîte va de Q1 à Q3, et les moustaches atteignent les observations les plus extrêmes situées à moins de 1,5 fois l’écart interquartile. Les valeurs situées au-delà sont représentées séparément.</p>
+  <p>Placer plusieurs boxplots côte à côte permet de comparer les tendances centrales, les dispersions et les observations atypiques de différents groupes.</p>
+
+  <h2>5. Étudier la relation entre deux variables</h2>
+  <p>Un <strong>nuage de points</strong> montre les couples de valeurs de deux variables. Il peut révéler une relation linéaire, une relation courbe, des groupes ou des observations isolées. Le coefficient de corrélation de Pearson mesure uniquement l’intensité et le sens d’une <strong>relation linéaire</strong>.</p>
+  <p class="note"><strong>Attention :</strong> corrélation ne signifie pas causalité. Une corrélation proche de zéro n’exclut pas une relation non linéaire.</p>
+
+  <h2>6. Visualiser plusieurs corrélations</h2>
+  <p>Une <strong>matrice de corrélation</strong> présente les coefficients de Pearson entre toutes les paires de variables numériques. Elle permet de repérer rapidement des relations linéaires fortes, notamment des variables potentiellement redondantes. Une valeur proche de +1 indique une relation croissante ; une valeur proche de −1, une relation décroissante.</p>
+
+  <h2>7. Explorer la structure en 2D et en 3D</h2>
+  <p>Lorsque les observations possèdent plusieurs variables, l’<strong>ACP</strong>, <strong>t-SNE</strong> ou <strong>UMAP</strong> peuvent aider à examiner leur répartition dans un espace réduit. Il est utile de regarder les représentations en <strong>deux et trois dimensions</strong> : des groupes superposés dans une vue 2D peuvent être plus faciles à distinguer dans une vue 3D.</p>
+  <p>En trois dimensions, faire tourner le nuage permet d’observer sa structure sous plusieurs angles. Cela peut suggérer des regroupements, des chevauchements ou des formes non linéaires, et aider à orienter le choix d’un modèle. Ces impressions doivent toujours être confrontées à une évaluation rigoureuse.</p>
+  <p class="note"><strong>Dans un problème supervisé :</strong> l’exploration qui sert à choisir des variables, un prétraitement ou un modèle doit être réalisée sur les données d’entraînement. Le jeu de test est réservé à l’évaluation finale.</p>
+  <p>Pour approfondir les méthodes : <a href="../reduction/acp.html">ACP</a> et <a href="../reduction/autres-methodes.html">t-SNE et UMAP</a>.</p>
+
+  <h2>8. Expérimentation</h2>
+  <div class="lab eda-lab" id="eda-lab">
+    <div class="eda-controls">
+      <label for="eda-dataset">Jeu de données
+        <select id="eda-dataset">
+          <option value="iris">Iris — 150 observations, 4 variables</option>
+          <option value="wine">Wine — 178 observations, 13 variables</option>
+        </select>
+      </label>
+      <label for="eda-feature">Variable à décrire
+        <select id="eda-feature"></select>
+      </label>
+      <label for="eda-filter">Observations affichées
+        <select id="eda-filter"></select>
+      </label>
+    </div>
+    <p class="eda-help">Les graphiques utilisent les mêmes observations. Les couleurs identifient les classes connues ; les histogrammes et statistiques peuvent être filtrés par classe.</p>
+
+    <h3 class="eda-block-title">Résumer une variable</h3>
+    <div class="comparison-table">
+      <table class="eda-stats-table">
+        <thead><tr><th>Effectif</th><th>Moyenne</th><th>Médiane</th><th>Q1</th><th>Q3</th><th>Écart-type</th><th>Min.</th><th>Max.</th></tr></thead>
+        <tbody><tr>
+          <td id="eda-n">—</td><td id="eda-mean">—</td><td id="eda-median">—</td>
+          <td id="eda-q1">—</td><td id="eda-q3">—</td><td id="eda-std">—</td>
+          <td id="eda-min">—</td><td id="eda-max">—</td>
+        </tr></tbody>
+      </table>
+    </div>
+    <div class="eda-grid-two">
+      <section class="eda-card">
+        <h3>Distribution — histogramme</h3>
+        <div class="chart" id="eda-hist"></div>
+        <p class="small">La moyenne et la médiane sont indiquées par deux lignes verticales.</p>
+      </section>
+      <section class="eda-card">
+        <h3>Comparaison — boxplots par classe</h3>
+        <div class="chart" id="eda-box"></div>
+        <p class="small">Les points situés au-delà des moustaches signalent des valeurs atypiques au sens du boxplot.</p>
+      </section>
+    </div>
+
+    <h3 class="eda-block-title">Décrire une variable catégorielle</h3>
+    <div class="eda-categorical-wrap">
+      <section class="eda-card">
+        <h3>Répartition des classes — effectifs et fréquences</h3>
+        <div class="chart" id="eda-category-chart"></div>
+        <p class="small">Le diagramme porte sur l'ensemble du jeu de données. La classe sélectionnée dans le filtre est mise en évidence.</p>
+      </section>
+    </div>
+
+    <h3 class="eda-block-title">Étudier les relations entre variables</h3>
+    <div class="eda-controls eda-pair-controls">
+      <label for="eda-x">Variable en abscisse
+        <select id="eda-x"></select>
+      </label>
+      <label for="eda-y">Variable en ordonnée
+        <select id="eda-y"></select>
+      </label>
+      <div class="eda-corr-value"><span>Corrélation de Pearson</span><strong id="eda-r">—</strong></div>
+    </div>
+    <div class="eda-grid-two">
+      <section class="eda-card">
+        <h3>Nuage de points</h3>
+        <div class="chart" id="eda-scatter"></div>
+        <p class="small">Chaque point représente une observation ; les couleurs correspondent aux classes.</p>
+      </section>
+      <section class="eda-card">
+        <h3>Matrice de corrélation</h3>
+        <div class="chart" id="eda-corr"></div>
+        <p class="small">Cliquez sur une case de la matrice pour afficher les deux variables dans le nuage de points.</p>
+      </section>
+    </div>
+
+    <div class="eda-embed-heading">
+      <h3 class="eda-block-title">Observer les mêmes données en 2D et en 3D</h3>
+      <label for="eda-method">Méthode de représentation
+        <select id="eda-method">
+          <option value="pca">ACP</option>
+          <option value="tsne">t-SNE</option>
+        </select>
+      </label>
+    </div>
+    <div class="eda-grid-two eda-embed-panels">
+      <section class="eda-card">
+        <h3 id="eda-2d-title">ACP — 2D</h3>
+        <div class="chart" id="eda-2d"></div>
+        <p class="small" id="eda-2d-help">Les deux premières composantes principales.</p>
+      </section>
+      <section class="eda-card">
+        <h3 id="eda-3d-title">ACP — 3D</h3>
+        <div class="chart eda-space" id="eda-3d"></div>
+        <p class="small">Faites glisser le graphique pour tourner la vue. Les couleurs désignent les mêmes observations qu'en 2D.</p>
+      </section>
+    </div>
+    <div class="eda-legend" id="eda-legend"></div>
+    <p class="eda-selection" id="eda-selection" aria-live="polite">Cliquez sur un point pour retrouver cette observation dans les représentations 2D et 3D.</p>
+    <p class="eda-interpret" id="eda-interpret"></p>
+  </div>
+
+  <h2>9. Questions pour réfléchir</h2>
+  <div class="qa-list">
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">1.</span> Pourquoi examiner la moyenne et la médiane d'une même variable ?</p><details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>La moyenne tient compte de toutes les valeurs et peut être tirée vers les extrêmes. La médiane partage la série en deux parties et y est moins sensible. Leur comparaison peut donc aider à repérer une distribution asymétrique.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">2.</span> Deux classes ont-elles nécessairement des distributions identiques si leurs moyennes sont égales ?</p><details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Non. Des classes peuvent partager la même moyenne tout en ayant des dispersions, des quartiles ou des formes de distribution différentes. Les histogrammes et boxplots permettent d'observer ces différences.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">3.</span> Une corrélation nulle signifie-t-elle que deux variables sont indépendantes ?</p><details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Non. Le coefficient de Pearson mesure une liaison linéaire. Deux variables peuvent avoir une relation courbe forte malgré une corrélation proche de zéro. Un nuage de points reste donc indispensable pour interpréter ce coefficient.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">4.</span> Que gagne-t-on à examiner les mêmes données en 2D puis en 3D ?</p><details class="qa-answer"><summary>Éléments de réponse</summary><div class="qa-answer-content"><p>La troisième dimension peut révéler une séparation ou une structure masquée en 2D. Cependant, les représentations réduites ne conservent pas toutes les propriétés de l'espace initial. Elles servent à formuler des hypothèses, pas à conclure à elles seules sur la qualité d'un classifieur.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">5.</span> Peut-on choisir définitivement un algorithme parce que des groupes semblent bien séparés en ACP, t-SNE ou UMAP ?</p><details class="qa-answer"><summary>Éléments de réponse</summary><div class="qa-answer-content"><p>Non. La séparation visuelle dépend de la méthode, des paramètres et du nombre de dimensions représentées. Elle peut orienter le choix des modèles à essayer, mais seul un protocole d'évaluation adapté permet de comparer leurs performances sur de nouvelles données.</p></div></details></div>
+  </div>
+
+  <details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+    <h3>Moyenne, variance et écart-type</h3>
+    <p>Pour les <span class="math">n</span> valeurs d'une variable numérique, la moyenne est <span class="math">x̄ = (1/n) ∑ xᵢ</span>. La variance empirique corrigée est <span class="math">s² = [1/(n−1)] ∑ (xᵢ−x̄)²</span> et l'écart-type est <span class="math">s = √s²</span>.</p>
+    <p>Avec les valeurs <span class="math">2, 4, 6, 8</span> : <span class="math">x̄ = (2+4+6+8)/4 = 5</span> ; <span class="math">s² = (9+1+1+9)/3 = 20/3 ≈ 6,67</span> ; <span class="math">s ≈ 2,58</span>.</p>
+    <h3>Quartiles et boxplot</h3>
+    <p>Q1 et Q3 délimitent la moitié centrale des observations ; l'écart interquartile est <span class="math">IQR = Q3 − Q1</span>. Une valeur en dessous de <span class="math">Q1 − 1,5 × IQR</span> ou au-dessus de <span class="math">Q3 + 1,5 × IQR</span> est signalée comme atypique par le boxplot. Cette règle ne suffit pas, à elle seule, à conclure qu'une observation est erronée.</p>
+    <h3>Coefficient de corrélation linéaire</h3>
+    <p>Pour deux variables numériques <span class="math">x</span> et <span class="math">y</span>, le coefficient de Pearson s'écrit :</p>
+    <div class="fond-formula"><math display="block" aria-label="Corrélation de Pearson"><mi>r</mi><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo>(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover><mi>x</mi><mo>¯</mo></mover><mo>)</mo><mo>(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mover><mi>y</mi><mo>¯</mo></mover><mo>)</mo></mrow><mrow><msqrt><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msup><mrow><mo>(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover><mi>x</mi><mo>¯</mo></mover><mo>)</mo></mrow><mn>2</mn></msup><mspace width="0.4em"/><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msup><mrow><mo>(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mover><mi>y</mi><mo>¯</mo></mover><mo>)</mo></mrow><mn>2</mn></msup></mrow></msqrt></mrow></mfrac></math></div>
+    <p>Par exemple, avec <span class="math">x = (1,2,3)</span> et <span class="math">y = (2,4,6)</span>, on a <span class="math">x̄ = 2</span>, <span class="math">ȳ = 4</span>, un numérateur égal à <span class="math">4</span> et un dénominateur égal à <span class="math">√(2 × 8) = 4</span> : <span class="math">r = 1</span>.</p>
+    <h3>Réduction de dimension</h3>
+    <p>Dans une ACP, on projette des observations centrées, éventuellement standardisées, sur les directions propres de la matrice de covariance. Les deux premières composantes donnent une représentation 2D ; l'ajout de la troisième donne une représentation 3D.</p>
+    <p>t-SNE recherche une représentation préservant certaines probabilités de voisinage. La représentation 3D est calculée directement en trois dimensions : <strong>elle ne consiste pas à ajouter une troisième coordonnée à la représentation 2D</strong>.</p>
+  </div></details>
+
+  <section class="references"><h2>Références</h2><ol>
+    <li><a href="https://scikit-learn.org/stable/datasets/toy_dataset.html#iris-plants-dataset" target="_blank" rel="noopener">scikit-learn, <i>Iris plants dataset</i></a>.</li>
+    <li><a href="https://scikit-learn.org/stable/datasets/toy_dataset.html#wine-recognition-dataset" target="_blank" rel="noopener">scikit-learn, <i>Wine recognition dataset</i></a>.</li>
+    <li><a href="https://scikit-learn.org/stable/modules/decomposition.html#pca" target="_blank" rel="noopener">scikit-learn, <i>Principal component analysis</i></a>.</li>
+    <li>van der Maaten et Hinton (2008), <a href="https://www.jmlr.org/papers/v9/vandermaaten08a.html" target="_blank" rel="noopener"><i>Visualizing Data using t-SNE</i></a>.</li>
+  </ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/exploration-data.js"></script>
+<script src="../assets/js/exploration.js"></script>
+</body>
+</html>

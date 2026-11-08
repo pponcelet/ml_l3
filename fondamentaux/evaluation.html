@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Évaluer un modèle — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="fond-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div>
+<h1>Évaluer un modèle</h1>
+<p class="lead">Choisir les métriques adaptées à un problème et apprendre à interpréter les erreurs plutôt qu’un score isolé.</p>
+<h2>1. Principe</h2>
+<p>La qualité d’un modèle doit être mesurée sur des observations <strong>non utilisées pour apprendre ses paramètres</strong>. La mesure dépend de la tâche : la classification compare des classes, tandis que la régression compare des valeurs numériques. Les métriques ne sont pas interchangeables.</p>
+<h2>2. Évaluer une classification</h2>
+<p>Pour deux classes, la <strong>matrice de confusion</strong> distingue les prédictions correctes et les deux types d’erreurs. Nous considérons ici la classe « positive » comme la classe d’intérêt.</p>
+<div class="concept-grid">
+<div class="concept"><strong>Exactitude (<i>accuracy</i>)</strong><p>Proportion totale de prédictions correctes. Peut masquer des erreurs sur une classe rare.</p></div>
+<div class="concept"><strong>Précision et rappel</strong><p>La précision indique la proportion de vrais positifs parmi les positifs prédits ; le rappel indique la proportion de positifs réels retrouvés.</p></div>
+</div>
+<h2>3. Expérimentation</h2>
+<div class="lab fond-eval-lab" id="fond-eval-lab">
+<div class="lab-head"><strong>Classification binaire — 100 observations, dont 20 positives</strong></div>
+<div class="fond-eval-controls"><label for="fond-threshold">Seuil de décision <output id="fond-threshold-value">0,50</output></label>
+<input type="range" id="fond-threshold" min="0.10" max="0.90" step="0.05" value="0.50">
+<span class="small">Prédire « positif » lorsque le score est supérieur ou égal au seuil.</span></div>
+<div class="fond-eval-workbench">
+<div><h3>Matrice de confusion</h3><div class="comparison-table"><table class="fond-matrix"><thead><tr><th>Classe réelle / prédite</th><th>Positive</th><th>Négative</th></tr></thead>
+<tbody><tr><th>Positive</th><td class="fond-true" id="fond-tp">—</td><td class="fond-false" id="fond-fn">—</td></tr>
+<tr><th>Négative</th><td class="fond-false" id="fond-fp">—</td><td class="fond-true" id="fond-tn">—</td></tr></tbody></table></div>
+<p class="small">VP : vrais positifs ; FP : faux positifs ; FN : faux négatifs ; VN : vrais négatifs.</p></div>
+<div><h3>Métriques obtenues</h3><div class="fond-score-grid">
+<div><span>Exactitude</span><strong id="fond-acc">—</strong></div>
+<div><span>Précision</span><strong id="fond-prec">—</strong></div>
+<div><span>Rappel</span><strong id="fond-rec">—</strong></div>
+<div><span>Score F1</span><strong id="fond-f1">—</strong></div>
+<div><span>Spécificité</span><strong id="fond-spec">—</strong></div>
+<div><span>Exactitude équilibrée</span><strong id="fond-bacc">—</strong></div>
+</div></div></div>
+<p class="lab-help" id="fond-threshold-hint">—</p>
+</div>
+<h3>Courbes ROC et précision-rappel</h3>
+<p>La courbe <strong>ROC</strong> représente le rappel (taux de vrais positifs) en fonction du taux de faux positifs. La courbe <strong>précision-rappel</strong> montre le compromis entre les deux métriques lorsque le seuil varie. Elle est particulièrement instructive si les positifs sont rares.</p>
+<div class="fond-curves" id="fond-curves">
+  <section class="fond-curve-card"><h3>Courbe ROC</h3><div id="fond-roc-chart"></div><p class="small">Axe horizontal : taux de faux positifs. Axe vertical : rappel.</p></section>
+  <section class="fond-curve-card"><h3>Courbe précision-rappel</h3><div id="fond-pr-chart"></div><p class="small">Axe horizontal : rappel. Axe vertical : précision.</p></section>
+</div>
+<p class="small">Le point entouré indique le résultat obtenu avec le seuil sélectionné dans l'expérimentation.</p>
+<p class="note"><strong>Comparer à un modèle de référence :</strong> prédire toujours « négatif » donnerait ici <strong>80 % d’exactitude</strong>, mais un rappel nul pour la classe positive. Avant de juger un modèle, comparez son score à une prédiction simple, appelée <strong>baseline</strong> ; le gain d'exactitude seul ne suffit pas.</p>
+<h2>4. Classification multiclasse</h2>
+<p>Lorsqu'il existe trois classes ou plus, la matrice de confusion contient une ligne et une colonne par classe. Pour chaque classe, on calcule une <strong>précision</strong>, un <strong>rappel</strong> et un <strong>F1</strong> en considérant successivement cette classe comme positive.</p>
+<div class="lab multi-lab" id="multi-lab">
+<div class="lab-head"><strong>Classification à trois classes</strong><label for="multi-case">Répartition<select id="multi-case"><option value="balanced">Classes équilibrées</option><option value="rare">Classe C rare</option></select></label></div>
+<div class="multi-layout"><div><h3>Matrice de confusion</h3><div class="comparison-table"><table><thead><tr><th>Réelle / prédite</th><th>A</th><th>B</th><th>C</th></tr></thead><tbody id="multi-matrix"></tbody></table></div></div>
+<div><h3>Mesures par classe</h3><div class="comparison-table"><table><thead><tr><th>Classe</th><th>Précision</th><th>Rappel</th><th>F1</th></tr></thead><tbody id="multi-details"></tbody></table></div></div></div>
+<div class="stats"><div><span>Exactitude</span><strong id="multi-acc">—</strong></div><div><span>F1 macro</span><strong id="multi-macro">—</strong></div><div><span>F1 micro</span><strong id="multi-micro">—</strong></div><div><span>F1 pondéré</span><strong id="multi-weighted">—</strong></div></div>
+<p class="lab-help" id="multi-reading"></p></div>
+<p><strong>Moyenne macro :</strong> chaque classe a le même poids. <strong>Micro :</strong> on regroupe les décisions correctes et incorrectes des différentes classes avant de calculer F1. <strong>Pondérée :</strong> les scores des classes sont pondérés par leur effectif réel. Dans cette classification multiclasse à étiquette unique, le F1 micro est égal à l'exactitude.</p>
+<h2>5. Évaluer une régression</h2>
+<p>Une référence simple en régression est de prédire toujours la <strong>moyenne de la cible calculée sur l’entraînement</strong>. Sur la validation ou le test, on évalue cette prédiction constante sans recalculer la moyenne avec les valeurs à prédire.</p>
+<p>En régression, on mesure la différence entre la valeur réelle <span class="math">y</span> et la prédiction <span class="math">ŷ</span>. L’erreur absolue moyenne (<strong>MAE</strong>) et la racine de l’erreur quadratique moyenne (<strong>RMSE</strong>) sont exprimées dans l’unité de la cible. La RMSE pénalise davantage les grandes erreurs. Le <strong>coefficient de détermination R²</strong> compare les erreurs du modèle à celles d'une prédiction constante égale à la moyenne des valeurs réelles. Il peut être négatif.</p>
+<div class="lab fond-reg-lab" id="fond-reg-lab">
+<div class="lab-head"><strong>Valeurs réelles et prédictions</strong></div>
+<div class="fond-eval-controls"><label for="fond-offset">Décalage des prédictions <output id="fond-offset-value">0,0</output></label>
+<input type="range" id="fond-offset" min="-2" max="2" step="0.2" value="0">
+<span class="small">Modifiez le décalage pour observer l’évolution des erreurs sur les mêmes observations.</span></div>
+<div class="fond-reg-figure" id="fond-reg-figure"></div>
+<div class="stats"><div><span>Erreur absolue moyenne (MAE)</span><strong id="fond-mae">—</strong></div>
+<div><span>Erreur quadratique moyenne (MSE)</span><strong id="fond-mse">—</strong></div>
+<div><span>Racine de la MSE (RMSE)</span><strong id="fond-rmse">—</strong></div>
+<div><span>Coefficient de détermination (R²)</span><strong id="fond-r2">—</strong></div></div>
+<p class="lab-help">Les segments pointillés indiquent les résidus : écarts verticaux entre les valeurs réelles et les prédictions.</p></div>
+<h2>6. Et en apprentissage non supervisé ?</h2>
+<p>Il n’existe pas toujours de classe attendue. En clustering, on peut étudier la <strong>silhouette</strong>, la stabilité des groupes, leur interprétabilité et leur cohérence avec le problème. Une silhouette élevée ne prouve pas, à elle seule, qu’une partition est pertinente. En réduction de dimension, on peut étudier la variance expliquée (ACP) ou la préservation des voisinages (t-SNE, UMAP).</p>
+<h2>7. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Si les faux négatifs sont particulièrement graves, quelle métrique faut-il surveiller en priorité ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Le rappel est prioritaire lorsqu&#x27;on souhaite réduire les faux négatifs : rappel = VP / (VP + FN). Il faut toutefois examiner aussi les faux positifs, car augmenter le rappel peut diminuer la précision.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Pourquoi faire varier le seuil modifie-t-il simultanément la précision et le rappel ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>En abaissant le seuil, davantage d&#x27;observations sont prédites positives. Cela permet souvent de récupérer plus de vrais positifs, mais aussi davantage de faux positifs. Le rappel augmente généralement, tandis que la précision peut évoluer différemment.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> À erreurs moyennes comparables, pourquoi la RMSE peut-elle préférer un modèle à un autre ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La RMSE pénalise davantage les grosses erreurs, car elle repose sur des erreurs au carré. Deux modèles ayant une MAE proche peuvent donc avoir des RMSE différentes si l&#x27;un commet quelques erreurs très importantes.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Pourquoi faut-il choisir les métriques <strong>avant</strong> d'examiner les performances sur le jeu de test ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Choisir une métrique après avoir vu les résultats du test favoriserait celle qui avantage le modèle observé. La métrique doit traduire le besoin du problème avant l&#x27;évaluation finale, afin de limiter ce biais de sélection.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">5.</span> Pourquoi une exactitude de 95 % peut-elle masquer un modèle incapable de repérer une classe rare ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Si 95 % des observations appartiennent à la classe majoritaire, un modèle qui prédit toujours cette classe atteint 95 % d&#x27;exactitude sans détecter un seul cas minoritaire. Il faut alors examiner le rappel, la précision et la matrice de confusion.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">6.</span> Comment interpréter un coefficient R² négatif ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Un R² négatif signifie que, sur les données évaluées, le modèle fait pire qu&#x27;une prédiction constante égale à la moyenne des valeurs réelles de cet ensemble. Cela indique une mauvaise adéquation ou une généralisation insuffisante.</p></div>
+</details>
+</div>
+<div class="qa-item"><p class="qa-question"><span class="qa-number">7.</span> Pourquoi préférer une moyenne macro au score global lorsqu'une classe est rare ?</p>
+<details class="qa-answer"><summary>Éléments de réponse</summary><div class="qa-answer-content"><p>La moyenne macro accorde la même importance à chaque classe, même lorsqu'une classe est peu représentée. Elle révèle ainsi qu'un modèle peut bien reconnaître la majorité tout en échouant sur une classe rare. Il faut examiner aussi les rappels de chaque classe et le coût réel des erreurs.</p></div></details></div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+<h3>Classification binaire</h3>
+<p>Avec les notations VP, FP, FN et VN pour la classe positive :</p>
+<div class="fond-formula">Exactitude = (VP + VN) / (VP + FP + FN + VN)</div>
+<div class="fond-formula">Précision = VP / (VP + FP) ; Rappel = VP / (VP + FN)</div>
+<div class="fond-formula">Spécificité = VN / (VN + FP)</div>
+<div class="fond-formula">F1 = 2 × Précision × Rappel / (Précision + Rappel)</div>
+<div class="fond-formula">Exactitude équilibrée = (Rappel + Spécificité) / 2</div>
+<p>Exemple : si l’on observe <strong>VP = 8, FP = 2, FN = 2, VN = 8</strong>, alors l’exactitude vaut <span class="math">(8+8)/20 = 80 %</span>, la précision <span class="math">8/(8+2) = 80 %</span>, le rappel <span class="math">8/(8+2) = 80 %</span> et F1 vaut <span class="math">80 %</span>.</p>
+<p>Si aucun positif n’est prédit, la précision est non définie : son dénominateur est nul. Cela ne signifie pas que le modèle est performant.</p>
+<h3>Courbes ROC et précision-rappel</h3>
+<p>Le taux de faux positifs est <span class="math">TFP = FP / (FP + VN)</span>. Chaque seuil de décision correspond à un couple <span class="math">(TFP, Rappel)</span> sur la courbe ROC et à un couple <span class="math">(Rappel, Précision)</span> sur la courbe précision-rappel. Avec 20 % de positifs, la précision d'une prédiction positive indépendante de la classe est en moyenne de 20 %.</p>
+<h3>Classification multiclasse</h3>
+<p>Pour la classe <span class="math">c</span>, on calcule précision<sub>c</sub>, rappel<sub>c</sub> et F1<sub>c</sub> en regroupant toutes les autres classes dans « non c ». Les moyennes usuelles sont :</p>
+<div class="fond-formula">F1<sub>macro</sub> = (1/C) × Σ<sub>c=1…C</sub> F1<sub>c</sub></div>
+<div class="fond-formula">F1<sub>pondéré</sub> = (1/N) × Σ<sub>c=1…C</sub> n<sub>c</sub> × F1<sub>c</sub></div>
+<p>Avec trois classes de 10 observations chacune, les poids sont identiques : la moyenne pondérée coïncide avec la moyenne macro. Si une classe représente 20 observations sur 30, elle reçoit un poids de 20/30 dans la moyenne pondérée.</p>
+<h3>Régression</h3>
+<p>Pour <span class="math">n</span> valeurs réelles <span class="math">y<sub>i</sub></span> et des prédictions <span class="math">ŷ<sub>i</sub></span> :</p>
+<div class="fond-formula">MAE = (1/n) × ∑<sub>i=1…n</sub> |y<sub>i</sub> − ŷ<sub>i</sub>|</div>
+<div class="fond-formula">MSE = (1/n) × ∑<sub>i=1…n</sub> (y<sub>i</sub> − ŷ<sub>i</sub>)²</div>
+<div class="fond-formula">RMSE = √MSE</div>
+<div class="fond-formula">R² = 1 − [∑<sub>i=1…n</sub>(y<sub>i</sub> − ŷ<sub>i</sub>)²] / [∑<sub>i=1…n</sub>(y<sub>i</sub> − ȳ)²]</div>
+<p>Exemple : pour <span class="math">y = (2, 4, 6)</span> et <span class="math">ŷ = (3, 4, 4)</span>, les erreurs absolues valent <span class="math">(1, 0, 2)</span>.</p>
+<div class="fond-formula">MAE = (1 + 0 + 2) / 3 = 1</div>
+<div class="fond-formula">MSE = (1² + 0² + 2²) / 3 = 5/3 ≈ 1,67 ; RMSE ≈ 1,29</div>
+<p>La moyenne réelle vaut <span class="math">ȳ = (2 + 4 + 6)/3 = 4</span>. La somme des carrés des écarts à la moyenne est <span class="math">(2−4)² + (4−4)² + (6−4)² = 8</span>. Pour les prédictions de l'exemple :</p>
+<div class="fond-formula">R² = 1 − (1² + 0² + 2²)/8 = 1 − 5/8 = 0,375</div>
+<p>Un R² égal à 1 correspond à une prédiction parfaite. Un R² égal à 0 signifie que l'erreur quadratique totale égale celle obtenue en prédisant systématiquement la moyenne réelle. Un R² négatif indique une erreur quadratique plus élevée que cette référence.</p>
+<p>La MAE et la RMSE s'expriment dans l'unité de la cible ; la MSE s'exprime dans cette unité au carré.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://scikit-learn.org/stable/modules/model_evaluation.html" target="_blank" rel="noopener">scikit-learn, <i>Metrics and scoring</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">scikit-learn, <i>Cross-validation</i></a>.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main>
+<script src="../assets/js/site.js"></script><script src="../assets/js/fondamentaux.js"></script><script src="../assets/js/multiclasse.js"></script>
+</body></html>

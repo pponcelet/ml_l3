@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Comparer les méthodes de classification — Apprentissage automatique</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="supcmp-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+  <div class="eyebrow">APPRENTISSAGE SUPERVISÉ · CLASSIFICATION</div>
+  <h1>Comparer les méthodes de classification</h1>
+  <p class="lead">Comparer Naive Bayes, la régression logistique, KNN, l'arbre de décision et le SVM sur les mêmes observations, en examinant leurs frontières de décision et leurs performances.</p>
+
+  <h2>1. Principe</h2>
+  <p>Un même problème de classification peut être résolu de plusieurs manières : à partir de probabilités conditionnelles, d'un score linéaire, des distances, de règles successives ou d'une frontière à grande marge. Les algorithmes ne font pas les mêmes hypothèses et ne réagissent pas de la même façon à la forme des données.</p>
+  <p>Pour les comparer, <strong>les cinq méthodes utilisent exactement les mêmes observations d'entraînement et de validation</strong>. Les réglages se font avec la validation. Le jeu de test reste réservé à l’évaluation finale, une fois les paramètres choisis.</p>
+
+  <h2>2. Expérimentation</h2>
+  <div class="lab supcmp-lab" id="supcmp-lab">
+    <div class="supcmp-toolbar">
+      <label for="supcmp-shape">Jeu de données
+        <select id="supcmp-shape">
+          <option value="moons">Deux lunes</option>
+          <option value="blobs">Deux groupes</option>
+          <option value="circles">Cercles concentriques</option>
+          <option value="xor">Damier (XOR)</option>
+          <option value="imbalanced">Classes déséquilibrées</option>
+          <option value="iris">Iris — trois classes</option>
+        </select>
+      </label>
+      <div class="supcmp-iris-fields" id="supcmp-iris-fields" hidden>
+        <label for="supcmp-iris-x">Axe horizontal
+          <select id="supcmp-iris-x">
+            <option value="0">Longueur sépale</option>
+            <option value="1">Largeur sépale</option>
+            <option value="2" selected>Longueur pétale</option>
+            <option value="3">Largeur pétale</option>
+          </select>
+        </label>
+        <label for="supcmp-iris-y">Axe vertical
+          <select id="supcmp-iris-y">
+            <option value="0">Longueur sépale</option>
+            <option value="1">Largeur sépale</option>
+            <option value="2">Longueur pétale</option>
+            <option value="3" selected>Largeur pétale</option>
+          </select>
+        </label>
+      </div>
+      <button class="btn secondary" type="button" id="supcmp-regenerate">Nouvelles observations</button>
+      <p id="supcmp-count" class="small supcmp-count">Répartition des observations.</p>
+    </div>
+    <p id="supcmp-caption" class="supcmp-caption">Deux lunes : une frontière droite ne peut pas séparer correctement les deux formes.</p>
+    <div class="supcmp-legend" aria-label="Légende des graphiques">
+      <span><i class="supcmp-swatch supcmp-blue"></i><span id="supcmp-legend-1">Classe 1</span></span>
+      <span><i class="supcmp-swatch supcmp-orange"></i><span id="supcmp-legend-2">Classe 2</span></span>
+      <span id="supcmp-legend-3" hidden><i class="supcmp-swatch supcmp-green"></i>Virginica</span>
+      <span><i class="supcmp-symbol supcmp-solid"></i>Entraînement</span>
+      <span><i class="supcmp-symbol supcmp-outline"></i>Validation</span>
+      <span>Fond coloré : classe prédite</span>
+    </div>
+    <div class="supcmp-grid">
+      <section class="supcmp-card" aria-labelledby="supcmp-title-nb">
+        <div class="supcmp-card-head"><h3 id="supcmp-title-nb">Naive Bayes</h3><p>Probabilités des variables par classe.</p></div>
+        <div class="supcmp-card-controls">
+          <label for="supcmp-smoothing">Lissage des variances <output id="supcmp-smoothing-value">0,05</output>
+            <input type="range" id="supcmp-smoothing" min="0" max="0.30" step="0.05" value="0.05">
+          </label>
+        </div>
+        <div class="supcmp-chart" id="supcmp-plot-nb"></div>
+        <div class="supcmp-metrics">
+          <div><span>Entraînement</span><strong id="supcmp-train-nb">—</strong></div>
+          <div><span>Validation</span><strong id="supcmp-test-nb">—</strong></div>
+          <div><span class="supcmp-recall-label">Rappel classe 2</span><strong id="supcmp-error-nb">—</strong></div>
+        </div>
+      </section>
+      <section class="supcmp-card" aria-labelledby="supcmp-title-log">
+        <div class="supcmp-card-head"><h3 id="supcmp-title-log">Régression logistique</h3><p>Probabilité calculée par une combinaison linéaire des variables.</p></div>
+        <div class="supcmp-card-controls">
+          <label for="supcmp-lambda">Régularisation λ <output id="supcmp-lambda-value">0,05</output>
+            <input type="range" id="supcmp-lambda" min="0" max="0.50" step="0.05" value="0.05">
+          </label>
+        </div>
+        <div class="supcmp-chart" id="supcmp-plot-log"></div>
+        <div class="supcmp-metrics">
+          <div><span>Entraînement</span><strong id="supcmp-train-log">—</strong></div>
+          <div><span>Validation</span><strong id="supcmp-test-log">—</strong></div>
+          <div><span class="supcmp-recall-label">Rappel classe 2</span><strong id="supcmp-error-log">—</strong></div>
+        </div>
+      </section>
+      <section class="supcmp-card" aria-labelledby="supcmp-title-knn">
+        <div class="supcmp-card-head"><h3 id="supcmp-title-knn">K plus proches voisins</h3><p>Vote des voisins dans l'espace des variables.</p></div>
+        <div class="supcmp-card-controls">
+          <label for="supcmp-k">Nombre de voisins K <output id="supcmp-k-value">5</output>
+            <input type="range" id="supcmp-k" min="1" max="25" step="2" value="5">
+          </label>
+        </div>
+        <div class="supcmp-chart" id="supcmp-plot-knn"></div>
+        <div class="supcmp-metrics">
+          <div><span>Entraînement</span><strong id="supcmp-train-knn">—</strong></div>
+          <div><span>Validation</span><strong id="supcmp-test-knn">—</strong></div>
+          <div><span class="supcmp-recall-label">Rappel classe 2</span><strong id="supcmp-error-knn">—</strong></div>
+        </div>
+      </section>
+      <section class="supcmp-card" aria-labelledby="supcmp-title-tree">
+        <div class="supcmp-card-head"><h3 id="supcmp-title-tree">Arbre de décision</h3><p>Règles de séparation successives.</p></div>
+        <div class="supcmp-card-controls">
+          <label for="supcmp-depth">Profondeur maximale <output id="supcmp-depth-value">4</output>
+            <input type="range" id="supcmp-depth" min="1" max="8" step="1" value="4">
+          </label>
+        </div>
+        <div class="supcmp-chart" id="supcmp-plot-tree"></div>
+        <div class="supcmp-metrics">
+          <div><span>Entraînement</span><strong id="supcmp-train-tree">—</strong></div>
+          <div><span>Validation</span><strong id="supcmp-test-tree">—</strong></div>
+          <div><span class="supcmp-recall-label">Rappel classe 2</span><strong id="supcmp-error-tree">—</strong></div>
+        </div>
+      </section>
+      <section class="supcmp-card" aria-labelledby="supcmp-title-svm">
+        <div class="supcmp-card-head"><h3 id="supcmp-title-svm">SVM</h3><p>Frontière de décision à marge souple.</p></div>
+        <div class="supcmp-card-controls supcmp-svm-controls">
+          <label for="supcmp-kernel">Noyau
+            <select id="supcmp-kernel"><option value="rbf">RBF</option><option value="linear">Linéaire</option></select>
+          </label>
+          <label for="supcmp-c">C <output id="supcmp-c-value">2,0</output>
+            <input type="range" id="supcmp-c" min="0.5" max="5" step="0.5" value="2">
+          </label>
+          <label for="supcmp-gamma">γ <output id="supcmp-gamma-value">1,00</output>
+            <input type="range" id="supcmp-gamma" min="0.25" max="2.00" step="0.25" value="1">
+          </label>
+        </div>
+        <div class="supcmp-chart" id="supcmp-plot-svm"></div>
+        <div class="supcmp-metrics">
+          <div><span>Entraînement</span><strong id="supcmp-train-svm">—</strong></div>
+          <div><span>Validation</span><strong id="supcmp-test-svm">—</strong></div>
+          <div><span class="supcmp-recall-label">Rappel classe 2</span><strong id="supcmp-error-svm">—</strong></div>
+        </div>
+      </section>
+    </div>
+    <p class="supcmp-under-legend">Survolez une observation pour la repérer dans les cinq graphiques. Les deux premiers pourcentages sont des <strong>exactitudes</strong>. Le rappel mesure la capacité à retrouver une classe ; pour Iris, il est moyenné sur les trois classes.</p>
+    <div class="supcmp-final" aria-live="polite">
+      <div><h3>Évaluation finale sur le test</h3><p>Choisissez les paramètres à l’aide de la validation, puis consultez une seule fois les résultats sur les observations de test. Le test n’est pas utilisé pour ajuster les modèles.</p></div>
+      <button class="btn primary" type="button" id="supcmp-final-button">Évaluer sur le test</button>
+      <p id="supcmp-final-info" class="small">Le jeu de test est masqué pendant les réglages.</p>
+      <div id="supcmp-final-results" class="comparison-table" hidden>
+        <table><thead><tr><th>Modèle</th><th>Exactitude</th><th>Erreurs</th><th id="supcmp-final-recall-heading">Rappel classe 2</th></tr></thead>
+        <tbody id="supcmp-final-rows"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <h2>3. Que faut-il comparer ?</h2>
+  <p>Essayez d'abord les <strong>deux lunes</strong>, puis les <strong>cercles concentriques</strong>. Comparez les frontières obtenues et la proportion de bonnes prédictions sur les observations de validation. Modifiez ensuite un paramètre d'une méthode sans toucher aux autres.</p>
+  <p>Avec le jeu de données <strong>Classes déséquilibrées</strong>, examinez surtout le rappel de la classe minoritaire : une exactitude élevée peut masquer de nombreuses erreurs sur cette classe.</p>
+  <p>Avec <strong>Iris</strong>, choisissez deux variables et observez les régions prédites pour les trois espèces. Comparez aussi le <strong>rappel macro</strong> : une classe difficile ne doit pas être masquée par de bons résultats sur les autres classes.</p>
+
+  <h2>4. Avantages et limites</h2>
+  <div class="comparison-table"><table>
+    <thead><tr><th>Méthode</th><th>Idée principale</th><th>À privilégier lorsque…</th><th>Point de vigilance</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Naive Bayes</strong></td><td>Probabilités conditionnelles</td><td>Un modèle probabiliste simple est pertinent</td><td>Hypothèse d'indépendance conditionnelle souvent approximative</td></tr>
+      <tr><td><strong>Régression logistique</strong></td><td>Probabilité issue d’un score linéaire</td><td>Une frontière linéaire suffit et des probabilités sont utiles</td><td>Limite pour les frontières non linéaires sans transformation de variables</td></tr>
+      <tr><td><strong>KNN</strong></td><td>Proximité des observations</td><td>La distance a un sens et les voisinages sont informatifs</td><td>Sensibilité à l'échelle, à K et à la dimension</td></tr>
+      <tr><td><strong>Arbre de décision</strong></td><td>Règles de séparation</td><td>Des décisions explicites sont recherchées</td><td>Risque de surapprentissage pour un arbre trop profond</td></tr>
+      <tr><td><strong>SVM</strong></td><td>Frontière à grande marge</td><td>Une frontière linéaire ou non linéaire convient</td><td>Choix du noyau et réglage de C et de γ</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note"><strong>À retenir :</strong> des paramètres réglés sur la validation peuvent donner un résultat différent sur le test. Si vous consultez le test puis modifiez à nouveau les paramètres en fonction de ce score, le test cesse d’être une évaluation indépendante.</p>
+
+  <h2>5. Questions pour réfléchir</h2>
+  <div class="qa-list">
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">1.</span> Pourquoi une même base peut-elle produire des frontières très différentes selon la méthode ?</p>
+      <details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Chaque méthode exprime une hypothèse différente : Naive Bayes combine des distributions, la régression logistique construit une probabilité à partir d’un score linéaire, KNN utilise des voisinages, l'arbre découpe l'espace et le SVM recherche une frontière à grande marge. Ces choix n'imposent pas la même forme aux régions de décision.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">2.</span> Que se passe-t-il quand vous augmentez fortement la profondeur de l'arbre ou réduisez K à 1 pour KNN ?</p>
+      <details class="qa-answer"><summary>Éléments de réponse</summary><div class="qa-answer-content"><p>Les frontières deviennent généralement plus détaillées et épousent davantage les observations d'entraînement. L'exactitude d'entraînement peut augmenter, mais celle de validation ne suit pas nécessairement : ces réglages peuvent favoriser le surapprentissage.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">3.</span> Pourquoi un SVM linéaire est-il moins adapté aux cercles concentriques qu'un SVM à noyau RBF ?</p>
+      <details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Une droite ne peut pas séparer un cercle intérieur d'un anneau extérieur. Le noyau RBF permet au SVM de construire une frontière courbe qui peut suivre la structure des données, à condition que ses paramètres soient adaptés.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">4.</span> Pourquoi ne suffit-il pas de retenir automatiquement le modèle avec la meilleure exactitude sur le test ?</p>
+      <details class="qa-answer"><summary>Éléments de réponse</summary><div class="qa-answer-content"><p>Consulter répétitivement le test pour choisir un modèle finit par biaiser l'évaluation. Il faut aussi tenir compte des erreurs par classe, de la complexité, de la stabilité et du coût des prédictions. Le choix des hyperparamètres s'effectue sur la validation ; le test vient ensuite.</p></div></details></div>
+    <div class="qa-item"><p class="qa-question"><span class="qa-number">5.</span> Sur Iris, pourquoi une exactitude élevée peut-elle masquer des difficultés pour une espèce ?</p>
+      <details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Un modèle peut très bien reconnaître deux espèces mais confondre régulièrement la troisième. Le rappel macro fait la moyenne des rappels de chaque espèce en leur donnant le même poids. La matrice de confusion permet ensuite d'identifier les espèces confondues.</p></div></details></div>
+  </div>
+
+  <details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+    <div class="detail-content">
+      <h3>Cinq règles de prédiction différentes</h3>
+      <p><strong>Naive Bayes.</strong> Pour un vecteur de variables <span class="math">x = (x₁, …, xₚ)</span>, le modèle choisit la classe qui maximise une probabilité a posteriori. Sous l'hypothèse d'indépendance conditionnelle :</p>
+      <div class="as-formula">ŷ = argmax<sub>c</sub> P(c) × ∏<sub>j=1</sub><sup>p</sup> P(x<sub>j</sub> | c)</div>
+      <p><strong>Régression logistique.</strong> Pour plusieurs classes, le modèle peut utiliser des probabilités obtenues avec la fonction softmax :</p>
+      <div class="as-formula">P(y = c | x) = exp(w<sub>c</sub><sup>⊤</sup>x + b<sub>c</sub>) / ∑<sub>j=1</sub><sup>C</sup> exp(w<sub>j</sub><sup>⊤</sup>x + b<sub>j</sub>)</div>
+      <p><strong>KNN.</strong> Avec les <span class="math">K</span> plus proches voisins de <span class="math">x</span>, on retient la classe la plus fréquente parmi leurs étiquettes.</p>
+      <div class="as-formula">ŷ = argmax<sub>c</sub> ∑<sub>i ∈ N<sub>K</sub>(x)</sub> 𝟙(y<sub>i</sub> = c)</div>
+      <p><strong>Arbre de décision.</strong> À chaque nœud, une coupure est choisie pour réduire l'impureté des groupes. Pour une proportion <span class="math">p<sub>c</sub></span> de chaque classe :</p>
+      <div class="as-formula">Gini = 1 − ∑<sub>c</sub> p<sub>c</sub><sup>2</sup></div>
+      <p>Par exemple, pour un nœud contenant 6 observations de classe 1 et 4 de classe 2, l'impureté vaut <span class="math">1 − 0,6² − 0,4² = 0,48</span>.</p>
+      <p><strong>SVM.</strong> Dans le cas linéaire, une droite de décision a pour équation <span class="math">wᵀx + b = 0</span>. Un noyau RBF permet de considérer des séparations non linéaires :</p>
+      <div class="as-formula">K(x, z) = exp(−γ ‖x − z‖²)</div>
+      <h3>Évaluer une classification multiclasse</h3>
+      <p>Le <strong>rappel macro</strong> est la moyenne des rappels de chaque classe, indépendamment de son effectif :</p>
+      <div class="as-formula">Rappel macro = (R<sub>1</sub> + ⋯ + R<sub>C</sub>) / C</div>
+      <p>Si les rappels des trois espèces d’Iris valent respectivement 100 %, 80 % et 70 %, le rappel macro vaut <strong>(100 + 80 + 70)/3 ≈ 83,3 %</strong>.</p>
+      <h3>Comparer les résultats sur le test</h3>
+      <p>Sur Iris, le SVM multiclasse suit une stratégie <strong>un contre tous</strong> : une frontière distingue successivement chaque espèce des deux autres. Pour <span class="math">n<sub>test</sub></span> observations de test, l'exactitude est :</p>
+      <div class="as-formula">Exactitude = (nombre de prédictions correctes) / n<sub>test</sub></div>
+      <p>Si un modèle classe correctement 27 observations sur 32, son exactitude est <span class="math">27/32 ≈ 84,4 %</span> et il commet 5 erreurs. La comparaison est pertinente lorsque les modèles sont évalués sur le même test, mais une exactitude identique peut masquer des erreurs de nature différente.</p>
+    </div>
+  </details>
+
+  <section class="references"><h2>Références</h2><ol>
+    <li><a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank" rel="noopener">scikit-learn, <i>Supervised learning</i></a>.</li>
+    <li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">scikit-learn, <i>Cross-validation: evaluating estimator performance</i></a>.</li>
+    <li>Cortes et Vapnik (1995), <a href="https://doi.org/10.1007/BF00994018" target="_blank" rel="noopener"><i>Support-Vector Networks</i></a>.</li>
+  </ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/exploration-data.js"></script>
+<script src="../assets/js/comparaison-supervise.js"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Entraînement, validation et test — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="fond-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div>
+<h1>Entraînement, validation et test</h1>
+<p class="lead">Apprendre sur certaines observations et mesurer la capacité du modèle à généraliser sur d’autres.</p>
+<h2>1. Principe</h2>
+<p>L’objectif d’un modèle prédictif n’est pas seulement de retrouver les réponses des données vues pendant l’apprentissage. Il doit fonctionner sur <strong>de nouvelles observations</strong>. Pour vérifier cette capacité de généralisation, on sépare les données selon des rôles différents.</p>
+<div class="fond-flow">
+<div><strong>Entraînement</strong><span>Apprendre les paramètres du modèle</span></div>
+<div><strong>Validation</strong><span>Choisir la méthode et ses hyperparamètres</span></div>
+<div><strong>Test</strong><span>Évaluer une seule fois le modèle retenu</span></div>
+</div>
+<p>La validation peut être remplacée ou complétée par une <strong>validation croisée</strong> sur l’ensemble d’entraînement. Le test reste indépendant de la sélection du modèle.</p>
+<h2>2. Expérimentation</h2>
+<p>Répartissez les 50 observations entre l'entraînement, la validation et le test. <strong>Déplacez les deux curseurs ou les séparateurs sur la barre</strong>, puis comparez un découpage aléatoire et un découpage stratifié. Dix observations appartiennent à la classe positive.</p>
+<div class="lab fond-split-lab" id="fond-split-lab">
+<div class="lab-head"><strong>Répartition de 50 observations</strong></div>
+<div class="fond-split-controls">
+<label for="fond-train">Entraînement <output id="fond-train-value">60 %</output>
+<input type="range" id="fond-train" min="40" max="80" step="2" value="60"></label>
+<label for="fond-validation">Validation <output id="fond-validation-value">20 %</output>
+<input type="range" id="fond-validation" min="10" max="40" step="2" value="20"></label>
+<label for="fond-strat-mode">Type de découpage
+<select id="fond-strat-mode"><option value="stratified">Stratifié</option><option value="random">Aléatoire</option></select></label>
+</div>
+<div class="fond-split-summary" aria-label="Parts des trois ensembles">
+<span>Entraînement <strong id="fond-summary-train">60 %</strong></span>
+<span>Validation <strong id="fond-summary-validation">20 %</strong></span>
+<span>Test <strong id="fond-summary-test">20 %</strong></span>
+</div>
+<div class="fond-split-track" id="fond-split-track" aria-label="Répartition ajustable. Faites glisser les deux séparateurs.">
+<div class="fond-split-segment fond-train" id="fond-track-train"></div>
+<div class="fond-split-segment fond-validation" id="fond-track-validation"></div>
+<div class="fond-split-segment fond-test" id="fond-track-test"></div>
+<div class="fond-split-handle" id="fond-handle-train" role="slider" tabindex="0" aria-label="Fin de l'ensemble d'entraînement" aria-valuemin="40" aria-valuemax="80" aria-valuenow="60" aria-valuetext="60 % d'entraînement"></div>
+<div class="fond-split-handle" id="fond-handle-validation" role="slider" tabindex="0" aria-label="Fin de l'ensemble de validation" aria-valuemin="50" aria-valuemax="90" aria-valuenow="80" aria-valuetext="20 % de validation, 20 % de test"></div>
+</div>
+<p class="small fond-split-instruction">Chaque case ci-dessous correspond à une observation. Les couleurs indiquent son ensemble ; un contour et un point blanc indiquent la classe positive.</p>
+<div class="fond-split-bars" id="fond-split-bars" role="img" aria-label="Répartition des cinquante observations"></div>
+<div class="stats"><div><span>Entraînement</span><strong id="fond-train-count">30</strong></div><div><span>Validation</span><strong id="fond-val-count">10</strong></div><div><span>Test</span><strong id="fond-test-count">10</strong></div></div>
+<p class="lab-help" id="fond-strat-result" aria-live="polite">—</p>
+<p class="small">Les parts totalisent toujours 100 %. Chaque ensemble contient au moins cinq observations. Un découpage stratifié cherche à conserver la proportion des classes dans chaque ensemble.</p>
+</div>
+<h2>3. Stratification et dépendances entre observations</h2>
+<p>En classification, un découpage <strong>stratifié</strong> vise à conserver la proportion des différentes classes. Par exemple, sur 50 observations dont 10 positives (20 %), un découpage en 30 observations d'entraînement, 10 de validation et 10 de test peut comporter respectivement <strong>6, 2 et 2 positifs</strong>.</p>
+<p>La stratification n'autorise cependant pas à mélanger n'importe quelles observations. Si plusieurs lignes concernent une même personne, elles doivent souvent rester ensemble ; pour des données temporelles, il faut généralement respecter la chronologie.</p>
+<h2>4. Surapprentissage et sous-apprentissage</h2>
+<div class="concept-grid">
+<div class="concept"><strong>Sous-apprentissage</strong><p>Un modèle trop simple manque les relations importantes : l’erreur reste élevée aussi bien sur l’entraînement que sur de nouvelles données.</p></div>
+<div class="concept"><strong>Surapprentissage</strong><p>Un modèle trop complexe mémorise certaines particularités du jeu d’entraînement : son erreur d’entraînement diminue, sans amélioration équivalente sur les données de validation.</p></div>
+</div>
+<p>La complexité d’un arbre, le nombre de voisins dans KNN ou le paramètre <span class="math">C</span> d’un SVM influencent ce compromis. Le choix se fait sur la validation, pas sur le test.</p>
+<h3>Expérimentation : complexité et généralisation</h3>
+<p>Modifiez la profondeur maximale d'un arbre de classification. Sur le graphique de gauche, observez comment les décisions épousent les observations d'entraînement. À droite, comparez l'erreur sur l'entraînement et celle sur la validation.</p>
+<div class="lab gen-lab" id="gen-lab">
+<div class="fond-eval-controls"><label for="gen-depth">Profondeur maximale <output id="gen-depth-value">3</output></label><input id="gen-depth" type="range" min="1" max="10" value="3"></div>
+<div class="gen-panels"><section><h3>Décisions de l'arbre</h3><div id="gen-fit"></div><p class="small">En bleu et orange : classes réelles des observations d'entraînement ; courbe en escalier : classe prédite selon x.</p></section>
+<section><h3>Erreurs selon la profondeur</h3><div id="gen-errors"></div><p class="small"><span class="gen-blue"></span> Entraînement <span class="gen-orange"></span> Validation</p></section></div>
+<div class="stats"><div><span>Erreur entraînement</span><strong id="gen-train-error">—</strong></div><div><span>Erreur validation</span><strong id="gen-val-error">—</strong></div></div>
+<p class="lab-help" id="gen-best"></p>
+</div>
+<p>Une diminution de l'erreur sur l'entraînement <strong>ne garantit pas</strong> une diminution de l'erreur de validation. Ce sont les performances sur des observations indépendantes de l'apprentissage qui guident le choix de la complexité.</p>
+<h2>5. Éviter les fuites de données</h2>
+<div class="algorithm"><ol>
+<li>Définissez les observations qui doivent rester ensemble (plusieurs mesures d’un même patient, par exemple) ou respecter un ordre chronologique.</li>
+<li>Constituez les ensembles d’entraînement et de test <strong>avant</strong> d’estimer les transformations apprises à partir des données.</li>
+<li>Estimez les imputations, les catégories d'encodage, les paramètres de mise à l'échelle et les sélections de variables uniquement sur l'entraînement, puis appliquez ces transformations aux autres ensembles. Consultez la <a href="preparation.html">préparation des données</a>.</li>
+<li>Choisissez les hyperparamètres sur la validation ou par validation croisée.</li>
+<li>Une fois le modèle choisi, mesurez la performance sur le test sans l’utiliser pour de nouveaux ajustements.</li>
+</ol></div>
+<p class="note"><strong>Exemple :</strong> standardiser toutes les observations avant de séparer entraînement et test laisse les statistiques du test influencer l’apprentissage. Il faut ajuster le prétraitement sur l’entraînement seulement.</p>
+<h2>6. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi une exactitude de 100 % sur l’entraînement n’est-elle pas suffisante ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Un modèle peut mémoriser les observations d&#x27;entraînement sans bien prédire de nouvelles données : c&#x27;est le surapprentissage. Seule une évaluation sur des observations non utilisées pour l&#x27;ajustement renseigne sur sa généralisation.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Que risque-t-on à essayer dix hyperparamètres et retenir celui qui obtient le meilleur score sur le test ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Le test sert alors au choix des hyperparamètres et n&#x27;est plus indépendant. Le score final risque d&#x27;être optimiste ; il faut choisir les paramètres par validation et réserver le test à une évaluation finale.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi un découpage aléatoire peut-il être inadapté pour une série temporelle ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Un découpage aléatoire peut placer des observations futures dans l&#x27;entraînement et des observations anciennes dans le test. On introduit alors une information temporelle indisponible en situation réelle ; une séparation chronologique est généralement plus adaptée.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Pourquoi une stratification est-elle utile lorsque la classe positive est rare ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Avec une classe rare, un tirage aléatoire peut produire un ensemble qui contient trop peu de positifs pour être représentatif. La stratification conserve approximativement leur proportion dans les différents ensembles.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+<h3>Erreur empirique et généralisation</h3>
+<p>Sur <span class="math">n</span> observations d’entraînement, l’erreur empirique d’un modèle <span class="math">f</span> est :</p>
+<div class="fond-formula">R<sub>ent</sub>(f) = (1/n) × ∑<sub>i=1…n</sub> ℓ(f(x<sub>i</sub>), y<sub>i</sub>)</div>
+<p>Pour cinq prédictions de classification, avec une seule erreur et une perte valant 0 si la réponse est correcte et 1 sinon :</p>
+<div class="fond-formula">R<sub>ent</sub>(f) = (0 + 0 + 1 + 0 + 0) / 5 = 0,20</div>
+<p>Mais l’erreur sur les données non vues peut être différente. Si le même modèle fait trois erreurs sur cinq observations de test, son erreur sur le test vaut <span class="math">3/5 = 60 %</span>. C’est cette différence qui motive une évaluation indépendante.</p>
+<h3>Proportions de classes</h3>
+<p>La proportion de la classe positive dans un ensemble <span class="math">E</span> est <span class="math">p(E) = n<sub>+</sub>(E) / |E|</span>. Si les 50 observations contiennent 10 positifs, la proportion globale vaut <span class="math">10/50 = 20 %</span>. Pour un entraînement stratifié de 30 observations, on cherche environ <span class="math">0,20 × 30 = 6</span> positifs.</p>
+<h3>Validation croisée</h3>
+<p>Avec une validation croisée à <span class="math">K</span> plis, on entraîne et on valide successivement sur <span class="math">K</span> découpages de l’ensemble d’entraînement. La performance moyenne s’écrit :</p>
+<div class="fond-formula">Score<sub>CV</sub> = (1/K) × ∑<sub>k=1…K</sub> Score<sub>k</sub></div>
+<p>Par exemple, pour trois plis donnant 72 %, 78 % et 75 %, le score moyen est <span class="math">(72 + 78 + 75)/3 = 75 %</span>. Ce score sert au choix du modèle ; il ne remplace pas une évaluation finale indépendante lorsque celle-ci est nécessaire.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">scikit-learn, <i>Cross-validation: evaluating estimator performance</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener">scikit-learn, <i>Common pitfalls and recommended practices</i></a>.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main>
+<script src="../assets/js/site.js"></script><script src="../assets/js/fondamentaux.js"></script><script src="../assets/js/generalisation.js"></script>
+</body></html>

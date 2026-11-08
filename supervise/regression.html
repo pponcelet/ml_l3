@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Régression — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE SUPERVISÉ · RÉGRESSION</div>
+<h1>Régression</h1>
+<p class="lead">Apprendre une relation entre des variables explicatives et une cible numérique.</p>
+
+<h2>1. Principe</h2><p>Une régression estime une quantité à partir d’observations. Dans la régression linéaire simple, on recherche une droite <span class="math">ŷ = ax + b</span> qui se rapproche des observations.</p>
+<h2>2. Algorithme général</h2><p>La droite est ajustée par la méthode des moindres carrés, qui minimise la somme des erreurs de prédiction au carré.</p><div class="algorithm"><ol><li>Observez les couples (xᵢ, yᵢ).</li><li>Choisissez les paramètres de la droite a et b.</li><li>Minimisez la somme des carrés des écarts entre valeurs observées et prédites.</li><li>Analysez les résidus et évaluez sur des données indépendantes.</li></ol></div>
+<h2>3. Expérimentation</h2><p>Déplacez le point orange pour observer l’influence d’une valeur atypique. La droite est recalculée par moindres carrés.</p>
+<div class="lab"><div class="lab-head"><strong>Régression linéaire et valeur atypique</strong><button id="reg-reset" class="btn secondary">Réinitialiser le point</button></div><div id="reg-plot" class="chart"></div><div class="stats"><div><span>Pente a</span><strong id="reg-slope">—</strong></div><div><span>Ordonnée à l’origine b</span><strong id="reg-intercept">—</strong></div><div><span>Erreur quadratique moyenne</span><strong id="reg-mse">—</strong></div></div></div>
+<h2>4. Avantages et limites</h2><div class="proscons"><div><h3>Avantages</h3><ul><li>Simple et interprétable.</li><li>Rapide pour de petites dimensions.</li></ul></div><div><h3>Limites</h3><ul><li>Hypothèse d’une relation linéaire.</li><li>Influence possible des valeurs extrêmes.</li></ul></div></div>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi la droite des moindres carrés change-t-elle lorsque vous déplacez le point atypique ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La méthode minimise la somme des résidus au carré. Une observation éloignée produit une grande contribution à ce critère et peut donc tirer la droite vers elle, surtout si elle se trouve aussi à une valeur extrême de x.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Quelle information apporte la pente d'une régression linéaire simple ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La pente indique la variation moyenne prédite de la variable cible lorsque x augmente d&#x27;une unité, selon la droite ajustée. Son interprétation dépend des unités et ne prouve pas une relation causale.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Une petite erreur d'entraînement garantit-elle une bonne prédiction ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Non. Une faible erreur d&#x27;entraînement peut provenir d&#x27;un ajustement trop spécifique aux observations vues. Pour juger la capacité de prédiction, on examine aussi les résidus et les métriques sur des données indépendantes.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content as-formal">
+
+<h3>Objectif des moindres carrés</h3>
+<p>On ajuste une droite <span class="math">ŷ = ax + b</span> en minimisant la somme des carrés des résidus :</p>
+<div class="as-formula">J(a,b) = Σ<sub>i=1…n</sub> (y<sub>i</sub> − ax<sub>i</sub> − b)<sup>2</sup></div>
+<h3>Exemple : trois observations</h3>
+<p>Considérons les couples <span class="math">(1, 2)</span>, <span class="math">(2, 4)</span> et <span class="math">(3, 5)</span>.</p>
+<div class="comparison-table"><table class="as-example-table"><thead><tr><th>Observation</th><th>x</th><th>y</th></tr></thead><tbody><tr><td>A</td><td>1</td><td>2</td></tr><tr><td>B</td><td>2</td><td>4</td></tr><tr><td>C</td><td>3</td><td>5</td></tr></tbody></table></div>
+<p>Les moyennes sont <span class="math">x̄ = (1 + 2 + 3)/3 = 2</span> et <span class="math">ȳ = (2 + 4 + 5)/3 = 11/3</span>.</p>
+<h3>Calculer la pente et l'ordonnée à l'origine</h3>
+<div class="as-formula">a = [Σ (x<sub>i</sub> − x̄)(y<sub>i</sub> − ȳ)] / [Σ (x<sub>i</sub> − x̄)<sup>2</sup>]</div>
+<div class="as-formula">a = [(−1)(−5/3) + 0(1/3) + 1(4/3)] / [1 + 0 + 1] = 3/2 = 1,5</div>
+<div class="as-formula">b = ȳ − ax̄ = 11/3 − (3/2) × 2 = 2/3 ≈ 0,67</div>
+<p>La droite ajustée est donc <span class="math">ŷ = 1,5x + 2/3</span>.</p>
+<h3>Interpréter les erreurs de prédiction</h3>
+<p>Les prédictions sont respectivement <span class="math">13/6</span>, <span class="math">11/3</span> et <span class="math">31/6</span>. Les résidus <span class="math">y<sub>i</sub> − ŷ<sub>i</sub></span> valent <span class="math">−1/6, 1/3, −1/6</span>.</p>
+<div class="as-formula">J = (−1/6)<sup>2</sup> + (1/3)<sup>2</sup> + (−1/6)<sup>2</sup> = 1/6</div>
+<div class="as-formula">EQM = J/n = (1/6) / 3 = 1/18 ≈ 0,056</div>
+<p>Un résidu positif signifie que la valeur observée est supérieure à la prédiction ; un résidu négatif signifie l'inverse.</p>
+
+</div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank" rel="noopener">scikit-learn, <i>Supervised learning</i></a></li><li><a href="https://scikit-learn.org/stable/modules/linear_model.html" target="_blank" rel="noopener">scikit-learn, <i>Linear Models</i></a></li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/vendor/d3.v7.min.js"></script>
+<script>
+if (!window.d3) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"><\/script>');
+}
+</script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/regression.js"></script>
+
+</body>
+</html>

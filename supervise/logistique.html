@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>Régression logistique — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-root="../"><aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">APPRENTISSAGE SUPERVISÉ · CLASSIFICATION</div>
+<h1>Régression logistique</h1>
+<p class="lead">Estimer la probabilité d'appartenance à une classe à partir d'une combinaison linéaire des variables.</p>
+<h2>1. Principe</h2>
+<p>Malgré son nom, la <strong>régression logistique</strong> est utilisée ici pour la <strong>classification</strong>. Elle calcule un score linéaire à partir des variables, puis applique la fonction <strong>sigmoïde</strong> pour obtenir une probabilité comprise entre 0 et 1. Un seuil permet enfin de prédire une classe.</p>
+<p>Dans un problème binaire, la frontière de décision est <strong>une droite</strong> lorsque les variables initiales sont utilisées sans transformation non linéaire.</p>
+<h2>2. Algorithme général</h2>
+<div class="algorithm"><ol>
+<li>Préparez les variables numériques et les catégories encodées, si nécessaire.</li>
+<li>Calculez le score linéaire <span class="math">z = w<sub>0</sub> + w<sub>1</sub>x<sub>1</sub> + w<sub>2</sub>x<sub>2</sub></span>.</li>
+<li>Transformez ce score en probabilité avec la fonction sigmoïde.</li>
+<li>Ajustez les coefficients pour réduire la perte logarithmique sur l'entraînement.</li>
+<li>Choisissez le seuil et les réglages sur la validation, puis évaluez le modèle.</li>
+</ol></div>
+<h2>3. Expérimentation</h2>
+<p>Choisissez un jeu de données et modifiez la régularisation ou le seuil. Cliquez sur le nuage pour déplacer l'observation à classer. Comparez les zones prédites, la probabilité obtenue et la courbe sigmoïde.</p>
+<div class="lab log-lab" id="log-lab">
+<div class="log-controls">
+<label for="log-shape">Jeu de données<select id="log-shape"><option value="blobs">Deux groupes</option><option value="moons">Deux lunes</option><option value="xor">Damier (XOR)</option></select></label>
+<label for="log-regularization">Régularisation λ <output id="log-regularization-value">0,05</output><input id="log-regularization" type="range" min="0" max="0.5" step="0.05" value="0.05"></label>
+<label for="log-threshold">Seuil de décision <output id="log-threshold-value">0,50</output><input id="log-threshold" type="range" min="0.1" max="0.9" step="0.05" value="0.5"></label>
+<button class="btn secondary" type="button" id="log-regenerate">Nouvelles observations</button>
+</div>
+<div class="log-panels">
+<section class="log-panel"><h3>Observations et zones de décision</h3><div id="log-scatter"></div><p class="small">Points pleins : entraînement ; points cerclés : validation. Le fond indique la classe prédite.</p></section>
+<section class="log-panel"><h3>Fonction sigmoïde</h3><div id="log-sigmoid"></div><p class="small">Le point orange correspond à l'observation choisie. La ligne pointillée représente le seuil.</p></section>
+</div>
+<div class="stats"><div><span>Probabilité classe 2</span><strong id="log-p">—</strong></div><div><span>Classe prédite</span><strong id="log-class">—</strong></div><div><span>Exactitude validation</span><strong id="log-accuracy">—</strong></div></div>
+<p class="lab-help" id="log-selected"></p><p class="small" id="log-count"></p>
+</div>
+<h2>4. Avantages et limites</h2><div class="proscons"><div><h3>Avantages</h3><ul><li>Modèle simple, rapide et interprétable.</li><li>Produit des probabilités, utiles pour ajuster un seuil de décision.</li></ul></div><div><h3>Limites</h3><ul><li>Frontière linéaire sans transformation des variables.</li><li>Sensible à la préparation des données et à la régularisation ; les probabilités peuvent nécessiter une vérification de calibration.</li></ul></div></div>
+<h2>5. Questions pour réfléchir</h2><div class="qa-list">
+<div class="qa-item"><p class="qa-question"><span class="qa-number">1.</span> Pourquoi la régression logistique est-elle un classifieur malgré son nom ?</p><details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>La sortie de la sigmoïde est une probabilité associée à une classe. L'application d'un seuil transforme cette probabilité en étiquette. Le modèle combine linéairement les variables, mais ne prédit pas directement une quantité continue arbitraire comme la régression linéaire.</p></div></details></div>
+<div class="qa-item"><p class="qa-question"><span class="qa-number">2.</span> Pourquoi un changement de seuil modifie-t-il la prédiction sans réentraîner le modèle ?</p><details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Les coefficients et les probabilités restent identiques : seule la règle utilisée pour convertir une probabilité en classe change. Un seuil plus faible prédit davantage de positifs, ce qui modifie notamment le rappel et les faux positifs.</p></div></details></div>
+<div class="qa-item"><p class="qa-question"><span class="qa-number">3.</span> Pourquoi la méthode sépare-t-elle difficilement le damier XOR ?</p><details class="qa-answer"><summary>Éléments de réponse</summary><div class="qa-answer-content"><p>Une seule droite ne permet pas de séparer correctement les quatre régions alternées du damier. Il faudrait enrichir les variables avec des interactions ou utiliser un modèle capable de produire une frontière non linéaire.</p></div></details></div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content as-formal">
+<h3>Score et probabilité</h3><p>Pour deux variables, on utilise un score linéaire <span class="math">z = w<sub>0</sub> + w<sub>1</sub>x<sub>1</sub> + w<sub>2</sub>x<sub>2</sub></span> et la fonction sigmoïde :</p>
+<div class="as-formula">P(Y = 1 | x) = σ(z) = 1 / (1 + e<sup>−z</sup>)</div>
+<p>Par exemple, avec <span class="math">w<sub>0</sub> = −2</span>, <span class="math">w<sub>1</sub> = 0,05</span>, <span class="math">w<sub>2</sub> = 0,02</span> et <span class="math">x = (40, 50)</span> :</p>
+<div class="as-formula">z = −2 + 0,05 × 40 + 0,02 × 50 = 1</div>
+<div class="as-formula">P(Y = 1 | x) = 1 / (1 + e<sup>−1</sup>) ≈ 0,731</div>
+<p>Avec un seuil de 0,5, l'observation est prédite dans la classe positive.</p>
+<h3>Apprentissage des coefficients</h3>
+<p>On choisit les coefficients en minimisant la <strong>perte logarithmique</strong> pour <span class="math">n</span> observations, éventuellement avec une pénalisation L2 :</p>
+<div class="as-formula">J(w) = −(1/n) Σ<sub>i=1…n</sub> [y<sub>i</sub> log(p<sub>i</sub>) + (1−y<sub>i</sub>) log(1−p<sub>i</sub>)] + (λ/2) Σ<sub>j=1…p</sub> w<sub>j</sub>²</div>
+<p>Si une observation est positive (<span class="math">y = 1</span>) et que le modèle annonce <span class="math">p = 0,8</span>, sa perte vaut <span class="math">−log(0,8) ≈ 0,223</span>. S'il annonce <span class="math">p = 0,1</span>, elle vaut <span class="math">−log(0,1) ≈ 2,303</span> : une prédiction confiante mais erronée est davantage pénalisée.</p>
+<p>Le coefficient <span class="math">λ</span> réduit l'amplitude des coefficients, à l'exception du biais <span class="math">w<sub>0</sub></span>. Les hyperparamètres sont choisis sur la validation.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression" target="_blank" rel="noopener">scikit-learn, <i>Logistic regression</i></a>.</li><li><a href="https://www.statlearning.com/" target="_blank" rel="noopener">James et al., <i>An Introduction to Statistical Learning</i></a>.</li></ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main>
+<script src="../assets/js/site.js"></script><script src="../assets/js/logistique.js"></script></body></html>

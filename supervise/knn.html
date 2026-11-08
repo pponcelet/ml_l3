@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>K plus proches voisins (KNN) — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE SUPERVISÉ · CLASSIFICATION</div>
+<h1>K plus proches voisins (KNN)</h1>
+<p class="lead">Prédire une classe à partir des observations étiquetées les plus proches.</p>
+
+<h2>1. Principe</h2><p>Pour classifier une nouvelle observation, KNN calcule sa distance aux exemples d’apprentissage et considère les k plus proches. La prédiction correspond ici à la classe majoritaire parmi les voisins ; en cas d’égalité, une règle de départage déterministe est utilisée.</p>
+<h2>2. Algorithme général</h2><div class="algorithm"><ol><li>Choisissez k et une distance.</li><li>Calculez la distance entre la nouvelle observation et chaque exemple.</li><li>Triez les exemples par distance croissante.</li><li>Votez parmi les k voisins les plus proches.</li></ol></div>
+<h2>3. Expérimentation</h2><p><strong>Cliquez dans le graphique</strong> pour déplacer l’observation à classifier. Modifiez k et la distance, puis observez les voisins sélectionnés et la prédiction.</p>
+<div class="lab"><div class="lab-head multi"><label>Nombre de voisins k <select id="knn-k"><option>1</option><option>3</option><option selected>5</option><option>7</option><option>9</option><option>15</option></select></label><label>Distance <select id="knn-metric"><option value="euclidean">Euclidienne</option><option value="manhattan">Manhattan</option><option value="chebyshev">Chebyshev</option></select></label></div><div id="knn-plot" class="chart"></div><div class="stats"><div><span>Classe prédite</span><strong id="knn-pred">—</strong></div><div><span>Vote</span><strong id="knn-votes">—</strong></div></div><p class="lab-help">Le contour orange signale les voisins retenus ; la croix noire est l’observation à prédire.</p></div>
+<h2>4. Avantages et limites</h2><div class="proscons"><div><h3>Avantages</h3><ul><li>Principe intuitif, sans entraînement paramétrique explicite.</li><li>Frontières de décision flexibles.</li></ul></div><div><h3>Limites</h3><ul><li>Choix de k, de la distance et de l’échelle.</li><li>Coût des prédictions et sensibilité au bruit.</li></ul></div></div>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Quel effet peut avoir le passage de k = 1 à un k plus grand ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Avec k = 1, la prédiction suit très localement l&#x27;observation la plus proche et peut être sensible au bruit. Augmenter k lisse souvent la frontière, mais un k trop grand peut faire disparaître des structures locales utiles.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Pourquoi changer de distance peut-il changer la classe prédite ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Euclidienne, Manhattan et Chebyshev ne calculent pas la proximité de la même manière. Les k voisins retenus peuvent donc changer et modifier le vote majoritaire.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi est-il souvent utile de standardiser les variables avant KNN ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Une variable mesurée sur une grande échelle peut dominer les distances et masquer les autres caractéristiques. Une mise à l&#x27;échelle adaptée permet d&#x27;éviter que les unités de mesure déterminent à elles seules les voisins.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content as-formal">
+
+<h3>Distances aux observations d'entraînement</h3>
+<p>Pour un point à classifier <span class="math">x = (2, 2)</span>, la distance euclidienne à une observation <span class="math">x<sub>i</sub> = (x<sub>i1</sub>, x<sub>i2</sub>)</span> est :</p>
+<div class="as-formula">d(x, x<sub>i</sub>) = √((2 − x<sub>i1</sub>)<sup>2</sup> + (2 − x<sub>i2</sub>)<sup>2</sup>)</div>
+<p>Les observations d'entraînement suivantes appartiennent à deux classes :</p>
+<div class="comparison-table"><table class="as-example-table"><thead><tr><th>Observation</th><th>Coordonnées</th><th>Classe</th><th>Distance à (2, 2)</th></tr></thead><tbody>
+<tr><td>A</td><td>(2, 1)</td><td>Rouge</td><td>1</td></tr>
+<tr><td>B</td><td>(1, 1)</td><td>Rouge</td><td>√2 ≈ 1,41</td></tr>
+<tr><td>C</td><td>(4, 2)</td><td>Bleu</td><td>2</td></tr>
+<tr><td>D</td><td>(5, 2)</td><td>Bleu</td><td>3</td></tr>
+<tr><td>E</td><td>(0, 5)</td><td>Bleu</td><td>√13 ≈ 3,61</td></tr>
+</tbody></table></div>
+<h3>Vote majoritaire parmi les k voisins</h3>
+<p>Avec <span class="math">k = 3</span>, les trois plus proches voisins sont A, B et C : deux sont rouges et un est bleu. La classe prédite est donc <strong>Rouge</strong>.</p>
+<div class="as-formula">ŷ(x) = arg max<sub>c</sub> Σ<sub>i ∈ N<sub>k</sub>(x)</sub> 𝟙(y<sub>i</sub> = c)</div>
+<p><span class="math">N<sub>k</sub>(x)</span> représente les indices des <span class="math">k</span> voisins les plus proches et <span class="math">𝟙</span> vaut 1 lorsque la classe correspond à <span class="math">c</span>, 0 sinon.</p>
+<p>Le choix de <span class="math">k</span> et de la distance peut modifier la prédiction. Les variables doivent être mises à une échelle pertinente avant de mesurer les distances.</p>
+
+</div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank" rel="noopener">scikit-learn, <i>Supervised learning</i></a></li><li><a href="https://scikit-learn.org/stable/modules/neighbors.html" target="_blank" rel="noopener">scikit-learn, <i>Nearest Neighbors</i></a></li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/vendor/d3.v7.min.js"></script>
+<script>
+if (!window.d3) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"><\/script>');
+}
+</script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/knn.js"></script>
+
+</body>
+</html>

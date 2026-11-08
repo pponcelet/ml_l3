@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Distances et similarités — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div>
+<h1>Distances et similarités</h1>
+<p class="lead">Comparer deux observations à partir de leurs variables, avec des mesures de proximité adaptées au problème.</p>
+
+<h2>1. Principe</h2>
+<p>Une distance quantifie la dissimilarité entre des observations décrites par des variables numériques. Elle intervient notamment dans KNN, dans le clustering hiérarchique et dans DBSCAN. La notion de « proche » dépend du choix de cette distance.</p>
+<div class="concept-grid">
+<div class="concept"><strong>Euclidienne (L2)</strong><p>Longueur du segment reliant deux points. <span class="math">d₂(A,B) = √(Σ (aⱼ−bⱼ)²)</span>.</p></div>
+<div class="concept"><strong>Manhattan (L1)</strong><p>Somme des écarts absolus par variable. <span class="math">d₁(A,B) = Σ |aⱼ−bⱼ|</span>.</p></div>
+<div class="concept"><strong>Chebyshev (L∞)</strong><p>Plus grand écart sur une coordonnée. <span class="math">d∞(A,B) = max |aⱼ−bⱼ|</span>.</p></div>
+<div class="concept"><strong>Cosinus</strong><p>Compare l’orientation des vecteurs plutôt que leur amplitude. <span class="math">sim(A,B) = (A·B)/(|A||B|)</span> pour des vecteurs non nuls.</p></div>
+</div>
+<h2>2. Expérimentation</h2>
+<p>Choisissez une mesure et <strong>déplacez les points A et B à la souris</strong>. Observez le trajet et la valeur affichés. La similarité cosinus est définie par rapport à l’origine.</p>
+<div class="lab"><div class="lab-head"><strong>Comparer deux observations</strong><label>Mesure <select id="dist-metric"><option value="euclidean">Euclidienne</option><option value="manhattan">Manhattan</option><option value="chebyshev">Chebyshev</option><option value="cosine">Similarité cosinus</option></select></label></div>
+<div id="distance-plot" class="chart"></div><div class="stats"><div><span>Point A</span><strong id="dist-a">—</strong></div><div><span>Point B</span><strong id="dist-b">—</strong></div><div><span>Valeur</span><strong id="dist-value">—</strong></div></div><p class="lab-help" id="dist-desc" aria-live="polite"></p></div>
+<h2>3. Formes des voisinages</h2>
+<p>À distance égale du centre, les points forment un cercle (Euclidienne), un losange (Manhattan) ou un carré (Chebyshev). Le choix de la distance change donc la géométrie des voisinages.</p>
+<div class="lab"><div id="distance-balls" class="chart chart-small"></div></div>
+<h2>4. Points de vigilance</h2>
+<p>Les distances sont sensibles aux unités et aux échelles des variables : une variable dont les valeurs sont très grandes peut dominer la comparaison. Une <a href="pretraitement.html">mise à l’échelle</a> peut être utile, mais ne remplace pas le choix des variables pertinentes.</p>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Deux points peuvent-ils être également proches selon Manhattan et Euclidienne ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Oui, ou non selon les points comparés : les distances euclidienne et Manhattan ne classent pas nécessairement les voisins dans le même ordre. La première utilise les carrés des écarts ; la seconde additionne leurs valeurs absolues.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Que devient la comparaison si une variable est mesurée en milliers et l’autre en unités ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Une variable mesurée en milliers peut dominer une distance calculée directement sur les valeurs brutes. Une mise à l&#x27;échelle pertinente évite qu&#x27;une unité de mesure décide à elle seule de la proximité entre observations.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi la similarité cosinus est-elle utile pour des vecteurs de grande dimension ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Le cosinus mesure l&#x27;orientation des vecteurs plutôt que leur longueur. C&#x27;est utile, par exemple, quand des documents sont représentés par de nombreux termes : deux textes peuvent avoir des profils similaires tout en ayant des longueurs différentes.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+<h3>Exemple numérique</h3>
+<p>Considérons deux observations <span class="math">A = (1, 2)</span> et <span class="math">B = (4, 6)</span>. Les écarts absolus valent 3 et 4.</p>
+<div class="fond-formula">Euclidienne : √(3² + 4²) = √25 = 5</div>
+<div class="fond-formula">Manhattan : 3 + 4 = 7</div>
+<div class="fond-formula">Chebyshev : max(3, 4) = 4</div>
+<p>Le choix d’une métrique change donc la notion de proximité, même sans changer les observations.</p>
+<h3>Définition mathématique</h3><p>Une distance métrique vérifie notamment la positivité, l’identité des indiscernables, la symétrie et l’inégalité triangulaire. Pour des vecteurs non nuls, <span class="math">1−cos(A,B)</span> est une dissimilarité courante, mais ce n’est pas une métrique au sens général.</p><p>La distance de Minkowski est <span class="math">dₚ(A,B) = (Σ|aⱼ−bⱼ|ᵖ)¹/ᵖ</span> pour p ≥ 1. Elle contient L1 et L2 comme cas particuliers.</p></div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/modules/clustering.html" target="_blank" rel="noopener">scikit-learn, <i>Clustering</i></a></li><li><a href="https://scikit-learn.org/stable/modules/metrics.html" target="_blank" rel="noopener">scikit-learn, <i>Pairwise metrics</i></a></li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/vendor/d3.v7.min.js"></script>
+<script>
+if (!window.d3) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"><\/script>');
+}
+</script>
+<script src="../assets/js/distances.js"></script>
+
+</body>
+</html>

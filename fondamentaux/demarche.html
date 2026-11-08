@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>Du problème à l'évaluation — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-root="../"><aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div><h1>Du problème à l'évaluation</h1>
+<p class="lead">Relier la définition du problème, la préparation des données, l'apprentissage et l'évaluation finale dans une même démarche.</p>
+<h2>1. Définir le problème</h2>
+<p>Nous souhaitons prédire si un abonné renouvellera son abonnement à partir de son <strong>nombre de visites</strong> et de son <strong>canal de contact</strong> (site ou boutique). La cible possède deux valeurs : « Oui » et « Non ». Il s'agit d'une <strong>classification supervisée binaire</strong>.</p>
+<p>Avant de choisir un algorithme, il faut identifier la cible, les variables disponibles au moment de la prédiction et la façon dont on mesurera les erreurs.</p>
+<h2>2. Examiner et préparer les données</h2>
+<p>Voici quelques observations :</p>
+<div class="comparison-table"><table><thead><tr><th>Observation</th><th>Visites</th><th>Canal</th><th>Renouvellement</th></tr></thead>
+<tbody><tr><td>A</td><td>1</td><td>Site</td><td>Non</td></tr>
+<tr><td>B</td><td>3</td><td>Boutique</td><td>Non</td></tr>
+<tr><td>C</td><td>4</td><td>Site</td><td>Oui</td></tr>
+<tr><td>D</td><td>6</td><td>Boutique</td><td>Oui</td></tr></tbody></table></div>
+<p>Le nombre de visites est numérique. Le canal est <strong>catégoriel nominal</strong> : une transformation telle que <a href="preparation.html">l'encodage one-hot</a> permet de l'utiliser dans de nombreux modèles. Les éventuelles valeurs manquantes sont traitées en estimant les paramètres d'imputation sur l'entraînement seulement.</p>
+<p>Il faut aussi vérifier qu'une même personne n'apparaît pas dans plusieurs ensembles et qu'aucune variable ne révèle après coup le renouvellement.</p>
+<h2>3. Séparer les données avant l'apprentissage</h2>
+<p>Nous utilisons ici 16 observations : huit pour l'entraînement, quatre pour la validation et quatre pour le test. Un exemple de répartition est présenté ci-dessous ; la répartition est décidée <strong>avant</strong> le choix des paramètres.</p>
+<div class="comparison-table"><table><thead><tr><th>Ensemble</th><th>Nombre de visites</th><th>Cible réelle</th></tr></thead><tbody>
+<tr><td><strong>Entraînement</strong></td><td>1, 2, 3, 3, 4, 5, 6, 7</td><td>Non, Non, Oui, Non, Oui, Oui, Oui, Oui</td></tr>
+<tr><td><strong>Validation</strong></td><td>2, 4, 5, 6</td><td>Non, Oui, Non, Oui</td></tr>
+<tr><td><strong>Test</strong></td><td>1, 3, 4, 6</td><td>Non, Non, Oui, Non</td></tr>
+</tbody></table></div>
+<p>Le jeu de test reste <strong>à l'écart</strong> des décisions de préparation et du choix du modèle.</p>
+<h2>4. Apprendre et choisir un modèle</h2>
+<p>Commençons par une règle de classification simple, portant uniquement sur les visites : « prédire Oui si le nombre de visites est au moins égal à un seuil ». Nous comparons deux seuils sur la validation.</p>
+<div class="comparison-table"><table><thead><tr><th>Règle</th><th>Prédictions sur les quatre observations de validation</th><th>Exactitude</th></tr></thead><tbody>
+<tr><td>Visites ≥ 4</td><td>Non, Oui, Oui, Oui</td><td><strong>3/4 = 75 %</strong></td></tr>
+<tr><td>Visites ≥ 5</td><td>Non, Non, Oui, Oui</td><td>2/4 = 50 %</td></tr>
+</tbody></table></div>
+<p>Nous choisissons le seuil 4 sur la validation, puis nous le <strong>figeons</strong>. Pour un apprentissage réel, ce type de seuil pourrait être appris par un arbre de décision ; le principe de sélection sur la validation reste identique.</p>
+<h2>5. Comparer à une référence et tester</h2>
+<p>Une référence consiste à prédire systématiquement la classe majoritaire de l'entraînement. Ici, cinq observations d'entraînement sur huit sont positives : la référence prédit donc toujours « Oui ». Sur le test, elle obtient 1 bonne prédiction sur 4, soit <strong>25 %</strong>.</p>
+<p>La règle retenue « visites ≥ 4 » prédit <strong>Non, Non, Oui, Oui</strong> sur le test, contre les valeurs réelles <strong>Non, Non, Oui, Non</strong> : elle obtient <strong>3/4 = 75 %</strong> d'exactitude.</p>
+<p>Le modèle surpasse cette référence sur ces quatre observations, mais cet échantillon est trop petit pour conclure à une performance générale fiable. Il faut examiner les types d'erreurs, utiliser suffisamment de données et, selon le contexte, tenir compte du déséquilibre des classes.</p>
+<h2>6. Interpréter et généraliser</h2>
+<p>Une bonne performance mesurée ne garantit pas que le modèle restera pertinent si les utilisateurs, les habitudes ou la collecte des données changent. Il faut examiner la <strong>représentativité</strong> des observations, les groupes éventuellement sous-représentés et les conséquences d'une erreur.</p>
+<p>Retenez l'ordre essentiel : <strong>définir le problème, préparer les données sans fuite, entraîner, choisir sur la validation, comparer à une référence et évaluer une dernière fois sur le test.</strong></p>
+<h2>7. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item"><p class="qa-question"><span class="qa-number">1.</span> Pourquoi le canal de contact doit-il être transformé pour certains algorithmes ?</p><details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Une catégorie telle que « Site » ou « Boutique » n'est pas une mesure numérique. Le one-hot encoding crée des variables binaires sans imposer d'ordre artificiel entre les catégories ; la transformation est définie sur les données d'entraînement.</p></div></details></div>
+<div class="qa-item"><p class="qa-question"><span class="qa-number">2.</span> Pourquoi ne peut-on pas modifier le seuil après avoir consulté le résultat de test ?</p><details class="qa-answer"><summary>Voir la réponse</summary><div class="qa-answer-content"><p>Le test commencerait à guider le choix du modèle et ne serait plus indépendant. Il faut réserver les réglages à la validation, puis utiliser le test une fois le choix fixé.</p></div></details></div>
+<div class="qa-item"><p class="qa-question"><span class="qa-number">3.</span> Pourquoi la comparaison à une référence est-elle utile ?</p><details class="qa-answer"><summary>Éléments de réponse</summary><div class="qa-answer-content"><p>Un score isolé ne révèle pas si le modèle apporte réellement une amélioration. Une prédiction constante fondée sur la classe majoritaire fournit un premier point de comparaison ; il faut ensuite considérer les métriques adaptées et l'incertitude liée à la taille de l'échantillon.</p></div></details></div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+<h3>Les trois ensembles</h3><p>On note <span class="math">D<sub>ent</sub></span>, <span class="math">D<sub>val</sub></span> et <span class="math">D<sub>test</sub></span> les trois ensembles disjoints. Pour un classifieur <span class="math">f<sub>θ</sub></span> défini par des paramètres θ, les hyperparamètres sont choisis en maximisant le score de validation.</p>
+<div class="fond-formula">θ* = arg max<sub>θ</sub> Score<sub>val</sub>(f<sub>θ</sub>)</div>
+<p>Dans l'exemple, le seuil fait partie des choix : l'exactitude sur la validation est de 75 % pour 4 et de 50 % pour 5. Nous retenons donc le seuil 4 parmi ces deux candidats.</p>
+<h3>Évaluation finale</h3><p>Une fois la règle fixée, la performance sur le test est calculée sans autre réglage :</p>
+<div class="fond-formula">Exactitude<sub>test</sub> = Nombre de prédictions correctes / Nombre d'observations = 3/4 = 0,75</div>
+<p>Cette estimation dépend de la taille du test et de sa représentativité. Elle ne doit pas être interprétée comme une garantie sur toutes les observations futures.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener">scikit-learn, <i>Common pitfalls and recommended practices</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">scikit-learn, <i>Cross-validation</i></a>.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main><script src="../assets/js/site.js"></script></body></html>

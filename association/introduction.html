@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Introduction à la fouille de motifs — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE NON SUPERVISÉ · FOUILLE DE MOTIFS</div>
+<h1>Introduction à la fouille de motifs</h1>
+<p class="lead">Découvrir des régularités fréquentes dans des ensembles d'objets ou des suites d'événements, sans disposer d'étiquettes de classes.</p>
+<h2>1. Principe</h2>
+<p>La fouille de motifs recherche les combinaisons ou les successions qui reviennent suffisamment souvent dans une collection de données. Contrairement au clustering, qui rassemble des observations en groupes, elle cherche <strong>ce qui apparaît ensemble</strong> ou <strong>dans quel ordre les événements se produisent</strong>.</p>
+<p>Le <strong>support</strong> d'un motif mesure le nombre ou la proportion d'observations qui le contiennent. Le seuil de support minimal permet de ne retenir que les motifs considérés comme fréquents.</p>
+<h2>2. Deux types de motifs</h2>
+<div class="concept-grid">
+<div class="concept"><strong>Ensembles fréquents et règles d'association</strong>
+<p>Dans des paniers d'achat, un ensemble tel que <span class="math">{Pain, Beurre}</span> indique que ces deux produits se trouvent dans les mêmes transactions. Une règle <span class="math">{Pain} ⇒ {Beurre}</span> précise une relation d'association, sans exprimer de causalité.</p>
+<p><a href="index.html">Découvrir les règles d'association et Apriori</a></p></div>
+<div class="concept"><strong>Motifs séquentiels</strong>
+<p>Dans des historiques, la séquence <span class="math">⟨A → C⟩</span> décrit le fait que l'événement A apparaît avant C. L'ordre compte : <span class="math">⟨C → A⟩</span> constitue un motif différent.</p>
+<p><a href="../sequences/index.html">Découvrir les motifs séquentiels et GSP</a></p></div>
+</div>
+<h2>3. Comprendre le support</h2>
+<p>Considérons quatre transactions : <span class="math">T<sub>1</sub> = {Pain, Beurre}</span>, <span class="math">T<sub>2</sub> = {Pain}</span>, <span class="math">T<sub>3</sub> = {Pain, Beurre, Lait}</span> et <span class="math">T<sub>4</sub> = {Lait}</span>.</p>
+<p>L'ensemble <span class="math">{Pain, Beurre}</span> apparaît dans deux transactions sur quatre : son support est donc <strong>2/4 = 50 %</strong>. Avec un seuil minimal de 50 %, ce motif est fréquent ; avec un seuil strictement supérieur à 50 %, il ne l'est plus.</p>
+<h2>4. Points de vigilance</h2>
+<ul>
+<li>Un motif fréquent n'est pas nécessairement utile ou surprenant.</li>
+<li>Une association statistique ne démontre pas une relation causale.</li>
+<li>Un seuil de support trop faible peut produire un grand nombre de motifs.</li>
+<li>Pour les séquences, le support dépend de l'ordre des événements et des contraintes choisies.</li>
+</ul>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi {Pain, Beurre} et ⟨Pain → Beurre⟩ ne décrivent-ils pas la même information ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>L&#x27;ensemble fréquent décrit une cooccurrence dans une transaction sans notion d&#x27;ordre. Le motif séquentiel exige que Pain précède Beurre dans un historique : l&#x27;information temporelle change donc la signification du résultat.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Avec quatre transactions, que devient le motif {Pain, Beurre} si le support minimal passe de 50 % à 75 % ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Le motif apparaît dans deux transactions sur quatre, soit 50 %. Il est fréquent au seuil de 50 %, mais ne l&#x27;est plus à 75 % puisque deux occurrences ne suffisent plus.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Un motif très fréquent est-il nécessairement intéressant ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Non. Sa fréquence ne dit rien, à elle seule, sur sa nouveauté ou son intérêt. Pour une règle, on peut aussi examiner la confiance et le lift ; pour une séquence, le contexte et l&#x27;ordre des événements comptent.</p></div>
+</details>
+</div>
+</div>
+<section class="references"><h2>Références</h2><ol>
+<li>Agrawal, R. et Srikant, R. (1994), <a href="https://www.vldb.org/conf/1994/P487.PDF" target="_blank" rel="noopener"><i>Fast Algorithms for Mining Association Rules in Large Databases</i></a>.</li>
+<li>Agrawal, R. et Srikant, R. (1995), <a href="https://doi.org/10.1109/ICDE.1995.380415" target="_blank" rel="noopener"><i>Mining Sequential Patterns</i></a>.</li>
+</ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Classification — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE SUPERVISÉ · CLASSIFICATION</div>
+<h1>Classification</h1>
+<p class="lead">Prédire une catégorie pour une observation à partir d’exemples étiquetés.</p>
+
+<h2>1. Principe</h2><p>À partir d’un ensemble d’entraînement de couples (xᵢ, yᵢ), où yᵢ désigne une classe, l’algorithme apprend une fonction qui prédit la classe d’une nouvelle observation.</p>
+<h2>2. Méthodes courantes</h2>
+<div class="concept-grid">
+<div class="concept"><strong>Naive Bayes</strong><p>Combine des probabilités conditionnelles sous une hypothèse d’indépendance des variables sachant la classe.</p><p><a href="naive-bayes.html">Expérimenter avec Naive Bayes</a></p></div>
+<div class="concept"><strong>Régression logistique</strong><p>Estime une probabilité de classe à partir d’un score linéaire, puis applique une règle de décision.</p><p><a href="logistique.html">Expérimenter avec la régression logistique</a></p></div>
+<div class="concept"><strong>KNN</strong><p>Attribue la classe majoritaire parmi les k observations les plus proches. Le choix de la distance est essentiel.</p><p><a href="knn.html">Expérimenter avec KNN</a></p></div>
+<div class="concept"><strong>Arbre de décision</strong><p>Construit des décisions successives à partir des variables, sous forme de règles explicites.</p><p><a href="arbre-decision.html">Expérimenter avec un arbre</a></p></div>
+<div class="concept"><strong>SVM</strong><p>Recherche une frontière de décision en maximisant la marge, avec des noyaux adaptés aux données non linéaires.</p><p><a href="svm.html">Expérimenter avec un SVM</a></p></div>
+</div>
+<p>Pour étudier leurs différences sur les mêmes observations, consultez la page <a href="comparaison.html">Comparer les méthodes de classification</a>.</p>
+<h2>3. Évaluation</h2><p>La matrice de confusion décrit les prédictions correctes et les erreurs par classe. L’exactitude peut être trompeuse lorsque les classes sont déséquilibrées. On utilise alors également la précision, le rappel ou le score F1 selon le problème. Retrouvez la <a href="../fondamentaux/evaluation.html">matrice de confusion et les métriques en expérimentation</a>.</p>
+
+<h2>4. Avantages et limites</h2><div class="proscons"><div><h3>Avantages</h3><ul><li>Un objectif prédictif clairement défini.</li><li>Évaluation possible sur des exemples étiquetés.</li></ul></div><div><h3>Limites</h3><ul><li>Nécessite des étiquettes d’apprentissage.</li><li>Sensible aux biais, aux déséquilibres et au décalage des données.</li></ul></div></div>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi une exactitude de 95 % peut-elle être trompeuse ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Si 95 % des observations sont négatives, un modèle qui prédit toujours « négatif » obtient 95 % d&#x27;exactitude sans détecter aucun positif. La matrice de confusion, la précision et le rappel sont indispensables pour interpréter ce score.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Comment choisir entre Naive Bayes, régression logistique, KNN, arbre de décision et SVM ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Le choix dépend des données et du besoin : interprétabilité des règles, type de variables, taille du jeu, dimension, forme des frontières et coût des prédictions. Une validation sur les mêmes partitions et métriques permet de comparer les modèles.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi ne peut-on pas juger un classifieur sur ses seuls résultats d'entraînement ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Un modèle très flexible peut mémoriser les exemples et néanmoins se tromper sur de nouvelles observations. Une évaluation indépendante mesure mieux la généralisation et révèle le risque de surapprentissage.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content as-formal">
+
+<h3>Fonction de classification</h3>
+<p>Pour <span class="math">C</span> classes possibles, le classifieur est une fonction <span class="math">f : ℝ<sup>p</sup> → {1, …, C}</span> : à partir des <span class="math">p</span> variables d'une observation, il prédit une classe.</p>
+<h3>Matrice de confusion : exemple</h3>
+<p>Considérons dix courriels, dont six sont réellement indésirables. Les prédictions obtenues sont :</p>
+<div class="comparison-table"><table class="as-example-table"><thead><tr><th>Classe réelle</th><th>Prédit indésirable</th><th>Prédit normal</th></tr></thead><tbody>
+<tr><td>Indésirable</td><td>4 (VP)</td><td>2 (FN)</td></tr>
+<tr><td>Normal</td><td>1 (FP)</td><td>3 (VN)</td></tr>
+</tbody></table></div>
+<p>VP désigne les vrais positifs, FP les faux positifs, FN les faux négatifs et VN les vrais négatifs.</p>
+<h3>Calculer les métriques</h3>
+<div class="as-formula">Exactitude = (VP + VN) / N = (4 + 3) / 10 = 70 %</div>
+<div class="as-formula">Précision = VP / (VP + FP) = 4 / (4 + 1) = 80 %</div>
+<div class="as-formula">Rappel = VP / (VP + FN) = 4 / (4 + 2) ≈ 66,7 %</div>
+<div class="as-formula">F1 = 2 × (précision × rappel) / (précision + rappel) = 8 / 11 ≈ 72,7 %</div>
+<p>La précision répond à la question « parmi les courriels signalés, combien sont réellement indésirables ? » ; le rappel mesure la proportion de courriels indésirables détectés. L'exactitude seule peut masquer de mauvaises performances sur une classe rare.</p>
+
+</div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank" rel="noopener">scikit-learn, <i>Supervised learning</i></a></li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+
+</body>
+</html>

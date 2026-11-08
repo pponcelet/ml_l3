@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Introduction à la réduction de dimension — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE NON SUPERVISÉ · RÉDUCTION DE DIMENSION</div>
+<h1>Introduction à la réduction de dimension</h1>
+<p class="lead">Représenter les observations avec moins de variables en conservant autant que possible la structure ou l'information pertinente.</p>
+<h2>1. Principe</h2>
+<p>Une observation peut être décrite par de nombreuses variables : pixels d'une image, mesures biologiques, caractéristiques d'un document ou d'un client. Lorsque la dimension augmente, la représentation et l'analyse deviennent plus difficiles.</p>
+<div class="concept-grid">
+<div class="concept"><strong>Visualiser</strong><p>Projeter des données décrites par de nombreuses variables dans un espace à deux ou trois dimensions.</p></div>
+<div class="concept"><strong>Résumer</strong><p>Construire quelques nouvelles variables qui capturent une part importante de l'information.</p></div>
+<div class="concept"><strong>Réduire le bruit</strong><p>Écarter certaines variations peu informatives, sous réserve de la méthode et des données.</p></div>
+<div class="concept"><strong>Faciliter l'analyse</strong><p>Réduire la taille de certaines représentations avant une étape de modélisation, en évaluant la perte éventuelle.</p></div>
+</div>
+<h2>2. Une projection implique des choix</h2>
+<p>Passer de trois, dix ou cent variables à deux axes ne peut pas préserver toutes les informations en général. Selon la méthode, on cherchera à conserver la variance globale, certaines relations de voisinage ou une structure géométrique particulière.</p>
+<p class="note"><strong>Attention :</strong> la réduction de dimension n'est pas un clustering. Une projection peut servir à visualiser des groupes, mais elle ne leur attribue pas nécessairement d'étiquette.</p>
+<h2>3. Méthodes étudiées</h2>
+<div class="hero-points">
+<a class="link-card" href="acp.html"><span class="index">MÉTHODE LINÉAIRE</span><strong>ACP (PCA)</strong><span>Rechercher les axes qui conservent le plus de variance, puis étudier une projection de 3D vers 2D.</span></a>
+<a class="link-card" href="autres-methodes.html"><span class="index">MÉTHODES NON LINÉAIRES</span><strong>t-SNE et UMAP</strong><span>Comparer des méthodes destinées notamment à représenter les voisinages dans des données complexes.</span></a>
+</div>
+<h2>4. Points de vigilance</h2>
+<ul>
+<li>Le prétraitement et la <a href="../fondamentaux/pretraitement.html">mise à l'échelle</a> des variables peuvent modifier fortement la projection.</li>
+<li>Deux points proches sur la figure ne l'étaient pas nécessairement autant dans l'espace original.</li>
+<li>Le meilleur choix dépend de l'objectif : interprétation, visualisation ou préparation de données.</li>
+</ul>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi réduire des observations de nombreuses dimensions à deux ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Une représentation 2D facilite l&#x27;exploration des relations entre observations. Elle implique toutefois une perte potentielle d&#x27;information : le résultat doit être interprété au regard de l&#x27;objectif et de la méthode choisie.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> En quoi l'ACP diffère-t-elle de t-SNE et d'UMAP ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>L&#x27;ACP cherche des directions linéaires conservant un maximum de variance. t-SNE et UMAP cherchent surtout à rendre certaines relations de voisinage visibles dans une nouvelle représentation, sans correspondre à une simple projection sur un plan.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Des amas distincts sur un graphique 2D prouvent-ils l'existence de classes naturelles ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Non. Les distances et séparations visuelles peuvent changer sous l&#x27;effet de la méthode et de ses paramètres. Il faut confronter la représentation à la structure initiale, aux étiquettes éventuelles et à d&#x27;autres analyses.</p></div>
+</details>
+</div>
+</div>
+<section class="references"><h2>Références</h2><ol>
+<li>Jolliffe et Cadima (2016), <a href="https://doi.org/10.1098/rsta.2015.0202" target="_blank" rel="noopener"><i>Principal component analysis: a review and recent developments</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/decomposition.html#pca" target="_blank" rel="noopener">scikit-learn, <i>Principal component analysis</i></a>.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer>
+</main><script src="../assets/js/site.js"></script>
+</body></html>

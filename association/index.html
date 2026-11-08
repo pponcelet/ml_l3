@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Règles d'association — Apriori — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../" class="pm-page as-page" data-pattern-script="association.js">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">EXPLORATION NON SUPERVISÉE · FOUILLE DE MOTIFS</div>
+<h1>Règles d'association — Apriori</h1>
+<p class="lead">Identifier les ensembles de produits fréquents dans une base de transactions et en déduire des règles d’association.</p>
+
+<h2>1. Principe</h2>
+<p>Une <strong>transaction</strong> représente ici un panier ; un <strong>item</strong> désigne un produit. Un <strong>itemset</strong> est un ensemble de produits, par exemple {Pain, Beurre}. Il est <em>fréquent</em> lorsque son support atteint le seuil choisi.</p>
+<p>Une règle telle que <strong>{Pain} ⇒ {Beurre}</strong> signifie que les paniers contenant du pain contiennent souvent aussi du beurre. Elle ne décrit ni un lien causal ni l'ordre des achats.</p>
+
+<h2>2. Algorithme général</h2>
+<p>Le support d'un itemset X est la proportion de transactions qui contiennent tous ses produits. Pour obtenir les <strong>itemsets fréquents</strong>, Apriori procède par niveaux : il construit des candidats de taille k, compte leur support, puis ne conserve que ceux qui satisfont le seuil.</p>
+<div class="concept-grid">
+  <div class="concept"><strong>C<sub>k</sub> — candidats</strong><p>Combinaisons de k produits susceptibles d'être fréquentes ; les candidats élagués ne sont pas comptés.</p></div>
+  <div class="concept"><strong>L<sub>k</sub> — itemsets fréquents</strong><p>Candidats de taille k dont le support atteint le minimum ; ils serviront à construire le niveau suivant.</p></div>
+</div>
+<div class="algorithm"><ol>
+  <li>Comptez les supports des produits individuels et obtenez L<sub>1</sub>.</li>
+  <li>Pour k = 2, 3, …, générez les candidats C<sub>k</sub> à partir de L<sub>k−1</sub>.</li>
+  <li>Éliminez les candidats dont au moins un sous-ensemble de taille k−1 n'est pas fréquent.</li>
+  <li>Comptez les supports des candidats conservés et formez L<sub>k</sub>.</li>
+  <li>Arrêtez lorsqu'il n'y a plus de candidats ou d'itemsets fréquents.</li>
+</ol>
+<pre>L1 = itemsets fréquents de taille 1
+Pour k = 2, 3, ... tant que L(k-1) est non vide :
+    Ck = générer les candidats à partir de L(k-1)
+    retirer les candidats avec un sous-itemset non fréquent
+    compter le support des candidats restants
+    Lk = {X dans Ck : support(X) ≥ minsup}
+Retourner tous les Lk</pre></div>
+<p class="note"><strong>Pourquoi peut-on élaguer ?</strong> Si {Pain, Lait} n'est pas fréquent, aucun ensemble contenant à la fois Pain et Lait ne peut être fréquent : son support ne peut pas être supérieur.</p>
+
+
+<h2>3. Expérimentation</h2>
+<p>La base de transactions et la recherche des itemsets fréquents sont présentées
+côte à côte. Modifiez une case à gauche : les supports et les résultats de
+l’algorithme, à droite, sont recalculés automatiquement.</p>
+<div class="as-workbench" aria-label="Transactions et animation Apriori synchronisées">
+<div class="lab pm-lab" id="as-baskets-lab">
+<div class="lab-head">
+<strong>Base de transactions modifiable</strong>
+<span class="small" id="as-dataset-summary">12 paniers · 5 produits</span>
+</div><p class="as-card-intro">Cliquez sur une case pour ajouter ou retirer un produit. Les calculs utilisent les transactions réellement affichées.</p>
+<div class="pm-table-scroll" id="as-matrix"></div>
+<div class="actions">
+<button class="btn secondary" id="as-add-basket" type="button">Ajouter un panier</button>
+<button class="btn ghost" id="as-restore" type="button">Rétablir les données d'origine</button>
+</div>
+<p aria-live="polite" class="lab-help" id="as-edit-status">Sélectionnez une case pour modifier une transaction.</p>
+
+</div>
+<div class="lab pm-lab" id="as-algorithm-lab">
+<div class="lab-head"><strong>Animation d'Apriori</strong><span class="small">Calcul exact sur les paniers à gauche</span></div><p class="as-card-intro">Modifiez le support minimal, puis suivez la génération des candidats et l’élimination des itemsets non fréquents.</p>
+<div class="pm-controls">
+<label for="as-minsup">Support minimal <output id="as-minsup-value">—</output>
+<input id="as-minsup" max="12" min="1" step="1" type="range" value="3"/>
+</label>
+<label for="as-speed">Vitesse
+      <select id="as-speed"><option value="1500">Lente</option><option selected="" value="900">Normale</option><option value="480">Rapide</option></select>
+</label>
+</div>
+<div class="actions">
+<button class="btn primary" id="as-play" type="button">Lancer</button>
+<button class="btn secondary" id="as-next" type="button">Étape suivante</button>
+<button class="btn ghost" id="as-reset" type="button">Recommencer</button>
+<button class="btn ghost" id="as-last" type="button">Voir le résultat</button>
+</div>
+<div class="pm-progress"><label for="as-step">Étape</label>
+<input id="as-step" max="1" min="0" step="1" type="range" value="0"/>
+<output id="as-step-value">—</output>
+</div>
+<div class="pm-stage-heading">
+<span class="pm-stage-badge" id="as-stage">C1</span>
+<div><h3 id="as-stage-title">Comptage des candidats</h3><p id="as-stage-desc">—</p></div>
+</div>
+<div class="pm-bars-scroll" id="as-bars"></div>
+<div aria-live="polite" class="stats pm-stats">
+<div><span>Itemsets affichés</span><strong id="as-stage-count">—</strong></div>
+<div><span>Itemsets fréquents trouvés</span><strong id="as-frequent-total">—</strong></div>
+</div>
+<p class="pm-error" id="pm-error" role="status"></p>
+<p class="figure-source">La ligne pointillée indique le support minimal. Les barres vertes atteignent le seuil, les grises non.</p>
+</div>
+</div>
+
+<h2>4. Des itemsets fréquents aux règles</h2>
+<p>Une fois les itemsets fréquents obtenus, nous considérons chaque décomposition d'un itemset en deux parties non vides et disjointes X et Y pour produire une règle <strong>X ⇒ Y</strong>. La confiance minimale permet de sélectionner les règles retenues.</p>
+<div class="comparison-table"><table class="pm-def-table"><thead><tr><th>Mesure</th><th>Formule</th><th>Signification</th></tr></thead><tbody>
+<tr><td>Support</td><td>supp(X ∪ Y)</td><td>Part de tous les paniers contenant X et Y.</td></tr>
+<tr><td>Confiance</td><td>supp(X ∪ Y) / supp(X)</td><td>Part des paniers contenant X qui contiennent aussi Y.</td></tr>
+<tr><td>Lift</td><td>conf(X ⇒ Y) / supp(Y)</td><td>Cooccurrence relative à une situation d'indépendance.</td></tr>
+</tbody></table></div>
+<div class="lab pm-lab" id="as-rules-lab">
+  <div class="lab-head"><strong>Règles extraites des itemsets fréquents</strong><span class="small">Mises à jour après toute modification</span></div>
+  <div class="pm-controls">
+    <label for="as-minconf">Confiance minimale <output id="as-conf-value">70 %</output>
+      <input type="range" id="as-minconf" min="40" max="100" step="5" value="70">
+    </label>
+    <div class="pm-rules-counter"><strong id="as-rules-count">—</strong> règles conservées</div>
+  </div>
+  <p class="small">Sélectionnez une règle du tableau pour retrouver les paniers qui contiennent son antécédent et son conséquent.</p>
+  <div class="comparison-table pm-rule-table">
+    <table><thead><tr><th>Règle X ⇒ Y</th><th>Support</th><th>Confiance</th><th>Lift</th></tr></thead>
+      <tbody id="as-rules-body"></tbody>
+    </table>
+  </div>
+  <p id="as-empty-rules" class="lab-help" hidden>Aucune règle ne satisfait les seuils choisis.</p>
+  <p id="as-rule-detail" class="lab-help" aria-live="polite">—</p>
+</div>
+<p class="note"><strong>À retenir :</strong> une forte confiance ne signifie pas nécessairement une association intéressante. Le lift apporte une information complémentaire, mais une association ne démontre jamais un lien causal.</p>
+
+<h2>5. Avantages et limites</h2>
+<div class="proscons">
+  <div><h3>Avantages</h3><ul><li>Étapes de génération, élagage et comptage faciles à suivre.</li><li>Recherche complète des itemsets satisfaisant le seuil minimal.</li><li>Résultats interprétables à partir du tableau de transactions.</li></ul></div>
+  <div><h3>Limites</h3><ul><li>Nombre de candidats et de règles parfois très élevé.</li><li>Plusieurs parcours de la base peuvent être nécessaires.</li><li>Choix des seuils délicat ; nombreuses règles potentiellement redondantes.</li></ul></div>
+</div>
+<h2>6. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Retirez le beurre de deux paniers qui contiennent également du pain. Quels supports et quelles règles sont modifiés ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Les supports de tous les itemsets qui contiennent du beurre diminuent s&#x27;ils étaient présents dans les paniers modifiés. Le support de {Pain} ne change pas. Les confiances des règles impliquant ces itemsets peuvent changer : une règle peut passer sous le seuil retenu.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Augmentez le support minimal. Comment évolue le nombre d’itemsets fréquents et pourquoi ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Le nombre d&#x27;itemsets fréquents ne peut pas augmenter quand le support minimal augmente : seuls les ensembles qui dépassent encore le nouveau seuil sont conservés. Les candidats issus d&#x27;ensembles éliminés sont également élagués.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Comparez les règles {Pain} ⇒ {Beurre} et {Beurre} ⇒ {Pain}. Ont-elles nécessairement la même confiance ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Non. Les deux règles ont le même support conjoint, mais pas le même dénominateur : conf(Pain ⇒ Beurre) = supp(Pain, Beurre) / supp(Pain), tandis que conf(Beurre ⇒ Pain) = supp(Pain, Beurre) / supp(Beurre). Les confiances diffèrent généralement.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Une confiance élevée signifie-t-elle que l’achat d’un produit provoque celui d’un autre ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Non. Une confiance élevée traduit une cooccurrence conditionnelle, pas une causalité. D&#x27;autres facteurs peuvent expliquer les achats ; le lift, les fréquences de base et le contexte aident à interpréter la relation.</p></div>
+</details>
+</div>
+</div>
+<details class="further" id="as-maths"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content as-formal">
+<p>Considérons les <strong>12 transactions initiales</strong> du tableau pour calculer les différentes mesures.</p>
+
+<h3>1. Représenter la base de transactions</h3>
+<p>Soit <span class="math">I</span> l’ensemble des produits et
+<span class="math">D = (T<sub>1</sub>, …, T<sub>n</sub>)</span> une base de
+<span class="math">n</span> transactions, où <span class="math">T<sub>i</sub> ⊆ I</span>.</p>
+<div class="as-formula">I = {Pain, Beurre, Lait, Œufs, Confiture}, &nbsp; n = 12</div>
+<p>Par exemple, <span class="math">T<sub>1</sub> = {Pain, Beurre, Lait}</span>
+et <span class="math">T<sub>2</sub> = {Pain, Beurre}</span>.
+L’ensemble <span class="math">X = {Pain, Beurre}</span> est un <strong>itemset</strong>.
+Il est présent dans une transaction lorsque <span class="math">X ⊆ T<sub>i</sub></span>.</p>
+
+<h3>2. Calculer le support d’un itemset</h3>
+<p>On commence par compter le nombre de transactions contenant un itemset :</p>
+<div class="as-formula">N(X) = |{T<sub>i</sub> ∈ D : X ⊆ T<sub>i</sub>}|</div>
+<p>Le <strong>support relatif</strong> correspond à la proportion de transactions concernées :</p>
+<div class="as-formula">supp(X) = N(X) / n</div>
+<p>Dans les 12 paniers initiaux, le pain apparaît 9 fois, le beurre 8 fois,
+et les deux produits apparaissent ensemble 8 fois :</p>
+<div class="comparison-table"><table class="as-example-table">
+<thead><tr><th>Itemset X</th><th>Nombre N(X)</th><th>Support supp(X)</th></tr></thead><tbody>
+<tr><td>{Pain}</td><td>9</td><td>9 / 12 = 75 %</td></tr>
+<tr><td>{Beurre}</td><td>8</td><td>8 / 12 ≈ 66,7 %</td></tr>
+<tr><td>{Pain, Beurre}</td><td>8</td><td>8 / 12 ≈ 66,7 %</td></tr>
+<tr><td>{Pain, Lait}</td><td>2</td><td>2 / 12 ≈ 16,7 %</td></tr>
+</tbody></table></div>
+<p>Si le support minimal est fixé à <strong>3 transactions sur 12</strong>
+(soit 25 %), {Pain, Beurre} est fréquent, mais {Pain, Lait} ne l’est pas.</p>
+
+<h3>3. Comprendre la propriété utilisée par Apriori</h3>
+<p>Si <span class="math">X ⊆ Y</span>, toute transaction contenant
+<span class="math">Y</span> contient aussi <span class="math">X</span>. Donc :</p>
+<div class="as-formula">X ⊆ Y &nbsp; ⇒ &nbsp; supp(Y) ≤ supp(X)</div>
+<p>Par exemple, <span class="math">X = {Pain, Lait}</span> apparaît dans
+<strong>2 paniers</strong>, tandis que
+<span class="math">Y = {Pain, Beurre, Lait}</span> apparaît dans
+<strong>1 seul panier</strong> :</p>
+<div class="as-formula">supp(Y) = 1 / 12 ≤ 2 / 12 = supp(X)</div>
+<p>Puisque {Pain, Lait} n’atteint pas le seuil de 3 paniers,
+<strong>aucun ensemble plus grand qui le contient ne peut être fréquent</strong>.
+Apriori peut donc éliminer de tels candidats sans calculer leur support.
+C’est la propriété d’<strong>antimonotonie du support</strong>.</p>
+
+<h3>4. Construire et mesurer une règle d’association</h3>
+<p>À partir d’un itemset fréquent, on construit une règle
+<span class="math">X ⇒ Y</span> avec <span class="math">X ∩ Y = ∅</span>
+et <span class="math">X ≠ ∅, Y ≠ ∅</span>. Dans notre exemple :</p>
+<div class="as-formula">{Pain} ⇒ {Beurre}</div>
+<p>Le <strong>support de la règle</strong> est celui de l’ensemble des produits
+présents à gauche et à droite :</p>
+<div class="as-formula">supp(X ⇒ Y) = supp(X ∪ Y) = 8 / 12 ≈ 66,7 %</div>
+<p>La <strong>confiance</strong> mesure la proportion de paniers contenant X
+qui contiennent également Y :</p>
+<div class="as-formula">conf(X ⇒ Y) = supp(X ∪ Y) / supp(X)<br>
+= (8 / 12) / (9 / 12) = 8 / 9 ≈ 88,9 %</div>
+<p>Le <strong>lift</strong> compare cette confiance à la fréquence de Y
+pris isolément :</p>
+<div class="as-formula">lift(X ⇒ Y) = conf(X ⇒ Y) / supp(Y)<br>
+= (8 / 9) / (8 / 12) = 4 / 3 ≈ 1,33</div>
+<p>Le lift est supérieur à 1 : pain et beurre sont associés positivement
+dans ces transactions, relativement à ce que l’on attendrait sous indépendance.
+Cela <strong>ne prouve pas une relation causale</strong>.</p>
+<p>Le sens de la règle est important : la règle inverse
+<span class="math">{Beurre} ⇒ {Pain}</span> a une confiance de
+<span class="math">8 / 8 = 100 %</span>, même si le support et le lift sont identiques.</p>
+
+<h3>5. Pourquoi Apriori est-il utile ?</h3>
+<p>Avec <span class="math">m</span> produits, il existe
+<span class="math">2<sup>m</sup> − 1</span> itemsets non vides.
+Pour les <strong>5 produits</strong> de notre base, cela représente
+<span class="math">2<sup>5</sup> − 1 = 31</span> itemsets potentiels.
+Apriori exploite l’antimonotonie pour éviter d’examiner certains
+candidats, même si le nombre d’itemsets fréquents peut rester très élevé.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+  <li>Agrawal, R. et Srikant, R. (1994). <a href="https://www.vldb.org/conf/1994/P487.PDF" target="_blank" rel="noopener"><i>Fast Algorithms for Mining Association Rules in Large Databases</i></a>, VLDB, p. 487–499.</li>
+  <li>Han, J., Pei, J. et Tong, H. (2022). <i>Data Mining: Concepts and Techniques</i>, 4e édition, Morgan Kaufmann.</li>
+</ol></section>
+<p class="note">Pour poursuivre, découvrez les <a href="../sequences/index.html">motifs séquentiels</a> : contrairement aux itemsets, ils tiennent compte de l'ordre des événements.</p>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/patterns-loader.js"></script>
+</body>
+</html>

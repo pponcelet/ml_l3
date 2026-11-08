@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Comparer les méthodes de clustering — Apprentissage automatique</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="cmp-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+  <div class="eyebrow">APPRENTISSAGE NON SUPERVISÉ · CLUSTERING</div>
+  <h1>Comparer les méthodes de clustering</h1>
+  <p class="lead">Les mêmes observations peuvent produire des partitions très différentes selon la définition d’un groupe adoptée par l’algorithme.</p>
+
+  <h2>1. Principe</h2>
+  <p>Choisissez un jeu de données. Les <strong>trois graphiques montrent exactement les mêmes observations</strong>, aux mêmes positions et aux mêmes échelles. Modifiez les paramètres pour comprendre comment chaque méthode définit ses groupes. Survolez un point pour le retrouver dans les trois graphiques.</p>
+
+  <h2>2. Expérimentation</h2>
+  <div class="lab cmp-lab" id="cmp-lab">
+    <div class="cmp-toolbar">
+      <label for="cmp-dataset">Jeu de données
+        <select id="cmp-dataset">
+          <option value="blobs">Groupes compacts</option>
+          <option value="elongated">Groupes allongés</option>
+          <option value="moons">Deux lunes</option>
+          <option value="circles">Cercles concentriques</option>
+          <option value="varying">Densités différentes</option>
+          <option value="noise">Groupes avec bruit</option>
+        </select>
+      </label>
+      <div class="cmp-toolbar-detail">
+        <span id="cmp-dataset-caption">Trois ensembles compacts et relativement séparés.</span>
+        <button class="btn cmp-regenerate" type="button" id="cmp-regenerate">Nouvelles observations</button>
+      </div>
+    </div>
+    <p class="cmp-start-note">Chaque jeu de données charge un réglage initial ; modifiez ensuite les paramètres pour comparer d’autres partitions.</p>
+    <div class="cmp-panels">
+      <section class="cmp-card" aria-labelledby="cmp-km-title">
+        <div class="cmp-card-head">
+          <h3 id="cmp-km-title">K-means</h3>
+          <p>Recherche K groupes compacts autour de leurs moyennes.</p>
+        </div>
+        <div class="cmp-card-controls">
+          <label for="cmp-k">Nombre de groupes <output id="cmp-k-value">3</output>
+            <input type="range" id="cmp-k" min="2" max="6" value="3">
+          </label>
+          <p class="cmp-control-note">La même valeur de K s'applique au hiérarchique.</p>
+        </div>
+        <div class="cmp-chart" id="cmp-kmeans-chart"></div>
+        <div class="cmp-metrics">
+          <div><span>Groupes</span><strong id="cmp-km-groups">—</strong></div>
+          <div><span>Silhouette</span><strong id="cmp-km-sil">—</strong></div>
+        </div>
+        <p class="cmp-insight" id="cmp-km-insight"></p>
+      </section>
+
+      <section class="cmp-card" aria-labelledby="cmp-hc-title">
+        <div class="cmp-card-head">
+          <h3 id="cmp-hc-title">Clustering hiérarchique</h3>
+          <p>Fusionne progressivement les groupes selon un critère de liaison.</p>
+        </div>
+        <div class="cmp-card-controls">
+          <label for="cmp-link">Critère de liaison
+            <select id="cmp-link">
+              <option value="ward">Ward</option>
+              <option value="single">Single</option>
+              <option value="complete">Complete</option>
+              <option value="average">Average</option>
+            </select>
+          </label>
+          <p class="cmp-control-note">Coupe de l'arbre à <strong>K = <span id="cmp-hc-k">3</span></strong>.</p>
+        </div>
+        <div class="cmp-chart" id="cmp-hierarchical-chart"></div>
+        <div class="cmp-metrics">
+          <div><span>Groupes</span><strong id="cmp-hc-groups">—</strong></div>
+          <div><span>Silhouette</span><strong id="cmp-hc-sil">—</strong></div>
+        </div>
+        <p class="cmp-insight" id="cmp-hc-insight"></p>
+      </section>
+
+      <section class="cmp-card" aria-labelledby="cmp-db-title">
+        <div class="cmp-card-head">
+          <h3 id="cmp-db-title">DBSCAN</h3>
+          <p>Identifie des zones denses et peut isoler le bruit.</p>
+        </div>
+        <div class="cmp-card-controls">
+          <label for="cmp-eps">Rayon ε <output id="cmp-eps-value">6,5</output>
+            <input type="range" id="cmp-eps" min="2" max="20" step="0.5" value="6.5">
+          </label>
+          <label for="cmp-minpts">MinPts <output id="cmp-minpts-value">5</output>
+            <input type="range" id="cmp-minpts" min="3" max="10" value="5">
+          </label>
+        </div>
+        <div class="cmp-chart" id="cmp-dbscan-chart"></div>
+        <div class="cmp-metrics">
+          <div><span>Groupes</span><strong id="cmp-db-groups">—</strong></div>
+          <div><span>Bruit</span><strong id="cmp-db-noise">—</strong></div>
+          <div><span>Silhouette*</span><strong id="cmp-db-sil">—</strong></div>
+        </div>
+        <p class="cmp-insight" id="cmp-db-insight"></p>
+      </section>
+    </div>
+    <p class="cmp-legend">Un même point est au même endroit dans les trois graphiques. Les couleurs désignent des groupes <strong>propres à chaque méthode</strong> ; le gris désigne les observations considérées comme bruit par DBSCAN.</p>
+    <div class="cmp-observation" aria-live="polite">
+      <strong>À observer</strong>
+      <p id="cmp-conclusion">Comparez les groupes compacts produits par les trois méthodes.</p>
+    </div>
+    
+  </div>
+
+  
+
+  <h2>3. Hypothèses et limites</h2>
+  <div class="comparison-table">
+    <table>
+      <thead><tr><th>Méthode</th><th>Logique du regroupement</th><th>Paramètres</th><th>Limite typique</th></tr></thead>
+      <tbody>
+        <tr><td>K-means</td><td>Compacité autour de centroïdes</td><td>K, initialisation</td><td>Groupes allongés ou non convexes</td></tr>
+        <tr><td>Hiérarchique</td><td>Fusions régies par la liaison</td><td>Liaison, coupe K</td><td>Résultat dépendant du critère et des fusions irréversibles</td></tr>
+        <tr><td>DBSCAN</td><td>Connexité des zones suffisamment denses</td><td>ε, MinPts</td><td>Densités très différentes</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note"><strong>Attention à la silhouette :</strong> il s'agit d'un indice interne basé ici sur les distances euclidiennes. La silhouette n'est définie que si au moins deux groupes non vides sont présents. Pour DBSCAN, le score affiché (*) est calculé <em>uniquement sur les points affectés à un groupe, hors bruit</em> : les échantillons évalués peuvent donc différer entre méthodes. Une silhouette plus élevée ne prouve pas, à elle seule, qu'une partition est plus pertinente.</p>
+  <h2>4. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Sur les <strong>deux lunes</strong>, quelles méthodes parviennent à suivre des groupes non convexes ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>DBSCAN peut suivre une forme non convexe lorsque la densité et les paramètres conviennent. Une liaison simple en hiérarchique peut aussi relier des points le long d&#x27;un croissant, mais elle est sensible aux chaînes de points et au bruit. K-means favorise plutôt des régions compactes.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Sur les <strong>cercles concentriques</strong>, pourquoi K-means ne retrouve-t-il pas naturellement les deux anneaux ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>K-means affecte chaque point au centroïde le plus proche, ce qui crée des régions de Voronoï convexes. Deux anneaux concentriques ne correspondent pas naturellement à de telles régions ; les clusters obtenus coupent souvent les anneaux en secteurs.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Que se passe-t-il lorsque vous remplacez <strong>Ward par Single</strong> dans le clustering hiérarchique ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Avec Single, la distance entre deux groupes correspond aux deux points les plus proches, ce qui facilite le regroupement de formes allongées, mais crée des effets de chaîne. Ward favorise des regroupements plus compacts en limitant l&#x27;augmentation d&#x27;inertie.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Avec <strong>DBSCAN</strong>, quel est l'effet d'une augmentation de ε ? Et de MinPts ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Augmenter ε agrandit les voisinages : davantage de points peuvent devenir des points cœur et des groupes peuvent fusionner. Augmenter MinPts rend au contraire la condition de densité plus exigeante ; on obtient souvent davantage de bruit et parfois moins de groupes.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">5.</span> Les trois méthodes trouvent-elles toujours le même nombre de groupes ? Un score élevé suffit-il à affirmer qu'une partition est pertinente ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Non. K-means et une coupe hiérarchique produisent généralement K groupes, tandis que DBSCAN déduit le nombre de groupes de la densité et peut produire du bruit. Un score interne élevé ne suffit pas : il faut aussi examiner la forme des groupes, leur stabilité et leur utilité.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content">
+<h3>Trois définitions mathématiques différentes d'un groupe</h3>
+<p>Considérons six observations situées sur un même axe, de coordonnée verticale nulle :</p>
+<div class="comparison-table"><table>
+  <thead><tr><th>Observation</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+  <tbody><tr><th>Coordonnées (x, y)</th><td>(0, 0)</td><td>(1, 0)</td><td>(2, 0)</td><td>(8, 0)</td><td>(9, 0)</td><td>(10, 0)</td></tr></tbody>
+</table></div>
+
+<p>Sur ces observations, chaque méthode peut retrouver les deux groupes <span class="math">{A,B,C}</span> et <span class="math">{D,E,F}</span>, mais <strong>elle ne les construit pas selon le même principe</strong>.</p>
+<div class="comparison-table"><table>
+<thead><tr><th>Méthode</th><th>Principe mathématique</th><th>Application à l’exemple</th></tr></thead>
+<tbody>
+<tr><td><strong>K-means</strong></td><td><span class="math">min J = ∑<sub>j</sub> ∑<sub>x∈Cⱼ</sub> ‖x−μⱼ‖²</span></td><td>Avec <span class="math">K = 2</span> : centres 1 et 9, inertie <strong>4</strong>.</td></tr>
+<tr><td><strong>Hiérarchique</strong></td><td>Fusionner les deux groupes minimisant un critère de liaison <span class="math">D(G₁,G₂)</span> ou, pour Ward, <span class="math">Δ(G₁,G₂)</span>.</td><td>Construire la hiérarchie, puis couper à <span class="math">K = 2</span>.</td></tr>
+<tr><td><strong>DBSCAN</strong></td><td>Propager les groupes depuis les points ayant <span class="math">|N<sub>ε</sub>(p)| ≥ MinPts</span>.</td><td>Avec <span class="math">ε = 1,1</span>, <span class="math">MinPts = 3</span> : <strong>2 groupes</strong>.</td></tr>
+</tbody></table></div>
+<p>Pour ces observations, les méthodes peuvent donner la même partition. Sur des données en anneaux, des formes allongées ou des densités différentes, leurs hypothèses conduisent souvent à des résultats distincts.</p>
+<h3>Peut-on comparer directement leurs scores ?</h3>
+<p><strong>Non.</strong> L’inertie de K-means, le coût de fusion de Ward et le nombre de points cœur de DBSCAN ne mesurent pas la même chose. Un petit nombre dans l’une de ces colonnes n’indique pas automatiquement une meilleure méthode.</p>
+<p>Pour comparer des partitions, on peut utiliser une mesure commune comme la <strong>silhouette moyenne</strong> lorsque ses conditions d’application sont réunies, puis étudier la stabilité et la pertinence métier. La silhouette peut être peu informative pour des groupes fortement non convexes ; il faut également expliciter la manière de traiter les observations considérées comme bruit.</p>
+</div></details>
+  <section class="references"><h2>Références</h2><ol>
+    <li><a href="https://scikit-learn.org/stable/modules/clustering.html" target="_blank" rel="noopener">scikit-learn, <i>Clustering</i> (comparaison des méthodes).</a></li>
+    <li><a href="https://doi.org/10.1109/TIT.1982.1056489" target="_blank" rel="noopener">Lloyd (1982), <i>Least Squares Quantization in PCM</i>.</a></li>
+    <li><a href="https://doi.org/10.1080/01621459.1963.10500845" target="_blank" rel="noopener">Ward (1963), <i>Hierarchical Grouping to Optimize an Objective Function</i>.</a></li>
+    <li><a href="https://www2.cs.sfu.ca/~ester/papers/kdd_96.pdf" target="_blank" rel="noopener">Ester et al. (1996), <i>DBSCAN</i>.</a></li>
+  </ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/vendor/d3.v7.min.js"></script>
+<script>
+if (!window.d3) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"><\/script>');
+}
+</script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/comparaison.js"></script>
+</body>
+</html>

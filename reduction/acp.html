@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>ACP (PCA) — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+<style>
+/* Équations de l'exemple ACP : présentation lisible sans bibliothèque supplémentaire. */
+#pca-maths .pca-math-scroll {
+    overflow-x: auto;
+    padding: 10px 4px;
+    max-width: 100%;
+    text-align: center;
+}
+#pca-maths .pca-math-scroll math {
+    font-size: 1.15rem;
+    color: #294d6f;
+    margin: 8px auto;
+}
+#pca-maths h4 {
+    color: #304d67;
+    margin: 23px 0 8px;
+    font-size: 15px;
+}
+@media (max-width: 650px) {
+    #pca-maths .pca-math-scroll math { font-size: .95rem; }
+}
+
+#pca-maths h3 {margin-top:28px; margin-bottom:10px; font-size:18px; color:#2d506f;}
+#pca-maths .comparison-table {overflow-x:auto;}
+#pca-maths .comparison-table table {width:100%;}
+#pca-maths .comparison-table th, #pca-maths .comparison-table td {text-align:center;}
+</style>
+</head>
+<body data-root="../" class="reduction-page pca-3d-page">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">RÉDUCTION DE DIMENSION</div>
+<h1>Analyse en composantes principales (ACP)</h1>
+<p class="lead">Projeter les observations sur des directions orthogonales qui conservent le maximum de variance.</p>
+
+<h2>1. Principe</h2>
+<p>Une observation peut être décrite par de nombreuses variables. L'<strong>analyse en composantes principales</strong> (ACP) construit de nouveaux axes, appelés <strong>composantes principales</strong>, qui capturent successivement la plus grande variance possible. Ces axes sont orthogonaux.</p>
+<p>En conservant seulement les premières composantes, on réduit la dimension des observations. Par exemple, nous allons passer ici <strong>de trois variables à deux</strong> : les observations sont projetées sur un plan, et une partie de leur variance initiale peut être perdue.</p>
+
+<h2>2. Algorithme général</h2>
+<div class="algorithm"><ol>
+<li><strong>Centrer</strong> chaque variable en lui soustrayant sa moyenne.</li>
+<li>Examiner l'intérêt d'une <strong>standardisation</strong> si les variables sont exprimées sur des échelles différentes.</li>
+<li>Calculer les <strong>directions principales</strong> à partir de la covariance des données centrées, ou par décomposition en valeurs singulières (SVD).</li>
+<li>Classer ces directions selon leur <strong>variance expliquée</strong> décroissante : PC1, PC2, PC3, etc.</li>
+<li>Conserver les premières composantes et <strong>projeter</strong> les observations sur l'espace qu'elles engendrent.</li>
+</ol></div>
+
+<h2>3. Expérimentation</h2>
+<p>Orientez le <strong>plan de projection</strong> avec les deux curseurs, puis comparez les observations en trois dimensions et leur représentation en deux dimensions. Le bouton <strong>« Trouver le plan optimal (ACP) »</strong> aligne le plan sur PC1 et PC2.</p>
+<p><strong>Attention :</strong> faire pivoter la caméra dans le graphique de gauche change uniquement le point de vue, pas les données ni la variance conservée.</p>
+
+<div class="lab" id="pca-lab">
+  <div class="pca-controls pca-3d-controls">
+    <label>Jeu de données
+      <select id="pca-dataset">
+        <option value="plane">Nuage proche d'un plan</option>
+        <option value="inclined">Plan fortement incliné</option>
+        <option value="line">Nuage très allongé</option>
+        <option value="sphere">Nuage presque sphérique</option>
+      </select>
+    </label>
+    <label>Inclinaison du plan : <output id="pca-tilt-value">40°</output>
+      <input type="range" id="pca-tilt" min="0" max="90" step="1" value="40" aria-label="Inclinaison du plan de projection">
+    </label>
+    <label>Orientation du plan : <output id="pca-azimuth-value">35°</output>
+      <input type="range" id="pca-azimuth" min="-180" max="180" step="1" value="35" aria-label="Orientation du plan de projection">
+    </label>
+  </div>
+  <div class="actions pca-3d-actions">
+    <button class="btn primary" type="button" id="pca-optimize">Trouver le plan optimal (ACP)</button>
+    <button class="btn ghost" type="button" id="pca-reset">Réinitialiser le plan</button>
+    <button class="btn ghost" type="button" id="pca-reset-camera">Réinitialiser la caméra</button>
+    <label class="pca-checkbox"><input type="checkbox" id="pca-show-projections"> Afficher plusieurs projections orthogonales</label>
+  </div>
+
+  <div class="pca-figures pca-3d-figures">
+    <div class="pca-figure">
+      <h3>Observations dans l'espace initial (3D)</h3>
+      <div class="chart" id="pca-space"></div>
+      <p>Faites glisser le graphique pour tourner la <strong>caméra</strong>. Le <strong style="color:#d28d59">premier axe du plan</strong> (orange) et le <strong style="color:#44957c">second axe du plan</strong> (vert) définissent le plan de projection.</p>
+    </div>
+    <div class="pca-figure">
+      <h3>Observations projetées sur le plan (2D)</h3>
+      <div class="chart" id="pca-projection"></div>
+      <p>Les positions correspondent aux coordonnées selon les axes <strong style="color:#d28d59">orange</strong> et <strong style="color:#44957c">vert</strong> du plan 3D. Cliquez sur une observation pour la suivre dans les deux graphiques.</p>
+    </div>
+  </div>
+
+  <p class="lab-help" id="pca-focus-status" aria-live="polite">Cliquez sur une observation pour suivre sa projection sur le plan et dans la vue 2D.</p>
+
+  <div class="stats pca-3d-stats" aria-live="polite">
+    <div><span>Variance conservée par le plan</span><strong id="pca-kept">—</strong></div>
+    <div><span>Variance perdue</span><strong id="pca-lost">—</strong></div>
+    <div><span>Variance sur le premier axe du plan</span><strong id="pca-axis-one">—</strong></div>
+    <div><span>Variance sur le second axe du plan</span><strong id="pca-axis-two">—</strong></div>
+  </div>
+  <p id="pca-comment" class="lab-help" aria-live="polite">Modifiez le plan ou demandez à l'ACP de calculer les deux composantes principales.</p>
+
+  <div class="pca-variance">
+    <div class="pca-variance-head">
+      <h3>Variances expliquées par les composantes principales</h3>
+      <label>Nombre de composantes conservées
+        <select id="pca-n-components">
+          <option value="1">1 composante</option>
+          <option value="2" selected>2 composantes</option>
+          <option value="3">3 composantes</option>
+        </select>
+      </label>
+    </div>
+    <div id="pca-spectrum"></div>
+    <p id="pca-spectrum-status" aria-live="polite"></p>
+    <p class="pca-message">Ce diagramme concerne les <strong>axes optimaux de l'ACP</strong>, indépendamment de l'orientation manuelle du plan affiché au-dessus.</p>
+  </div>
+  
+</div>
+
+<p class="lab-help">La vue 3D utilise une projection orthographique pour représenter les observations à l’écran.</p>
+
+<h2>4. Comment choisir le nombre de composantes ?</h2>
+<p>La variance expliquée par une composante mesure sa part de la variance totale. La <strong>variance expliquée cumulée</strong> indique combien on en conserve avec les premières composantes. On peut choisir un compromis (par exemple viser 90 %), mais ce seuil n'est pas une règle universelle.</p>
+<p>Dans notre expérience 3D, retenir les trois composantes conserve 100 % de la variance, mais ne réduit plus la dimension. Retenir PC1 et PC2 produit une représentation plane ; retenir uniquement PC1 produit une représentation sur une droite.</p>
+
+<h2>5. Avantages et limites</h2>
+<div class="proscons">
+  <div><h3>Avantages</h3><ul>
+    <li>Réduction linéaire et déterministe à données fixées.</li>
+    <li>Axes orthogonaux et ordonnés par variance expliquée.</li>
+    <li>Visualisation et synthèse des variables corrélées.</li>
+  </ul></div>
+  <div><h3>Limites</h3><ul>
+    <li>Ne capture pas directement une structure non linéaire.</li>
+    <li>Une forte variance n'est pas nécessairement l'information utile à une tâche.</li>
+    <li>Résultats sensibles aux échelles des variables et aux valeurs atypiques.</li>
+  </ul></div>
+</div>
+
+
+
+<details class="further" id="pca-one-dimension"><summary>Pour comprendre : projection de 2D vers 1D</summary>
+  <div class="detail-content">
+    <p>Une projection sur une droite est le cas le plus simple de la même idée. Faites tourner la direction choisie dans le plan PC1–PC2 : les coordonnées le long de la droite changent et la variance projetée est maximale lorsque l'axe coïncide avec PC1.</p>
+    <label class="pca-mini-label">Orientation de la droite dans le plan : <output id="pca-mini-angle-value">35°</output>
+      <input id="pca-mini-angle" type="range" min="0" max="180" value="35" step="1">
+    </label>
+    <div class="pca-mini-figure" id="pca-mini-chart"></div>
+    <p><strong>Variance conservée sur cette droite :</strong> <output id="pca-mini-ratio">—</output> de la variance du plan PC1–PC2.</p>
+  </div>
+</details>
+
+
+<h2>6. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Qu'observez-vous lorsque le plan tourne ? Comment évolue la variance conservée ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Quand on oriente le plan vers les directions où le nuage s&#x27;étale le plus, la variance conservée augmente. Elle est maximale lorsque le plan est engendré par les deux premières composantes principales ; certaines orientations perdent davantage d&#x27;information.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Pourquoi une rotation de la caméra ne modifie-t-elle pas les coordonnées 2D obtenues ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Tourner la caméra modifie seulement le point de vue sur le nuage 3D. Les coordonnées projetées dépendent du plan choisi et des observations, pas de la position de la caméra.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi deux composantes suffisent-elles mieux pour un nuage presque plan que pour un nuage presque sphérique ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Un nuage presque plan possède très peu de variation dans la direction perpendiculaire : deux composantes peuvent donc conserver presque toute sa variance. Un nuage presque sphérique répartit sa variance entre trois directions, et en supprimer une fait perdre davantage d&#x27;information.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Pourquoi la <a href="../fondamentaux/pretraitement.html">standardisation</a> peut-elle modifier les composantes principales ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La standardisation divise chaque variable par son écart-type après centrage. Elle change donc l&#x27;importance relative des variables dans la covariance et peut modifier les vecteurs propres, les composantes principales et la variance expliquée.</p></div>
+</details>
+</div>
+</div>
+<details class="further" id="pca-maths">
+  <summary>Pour aller plus loin — formalisation mathématique</summary>
+  <div class="detail-content">
+    <h3>Un exemple : passer de trois dimensions à deux</h3>
+    <p>Considérons six observations décrites par trois variables
+    <span class="math">x</span>, <span class="math">y</span> et
+    <span class="math">z</span>. L'objectif est de représenter ces
+    observations avec deux coordonnées, en conservant le maximum
+    de variance possible.</p>
+    <div class="comparison-table"><table>
+      <thead><tr><th>Observation</th><th>x</th><th>y</th><th>z</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>3</td><td>0</td><td>0</td></tr>
+        <tr><td>B</td><td>−3</td><td>0</td><td>0</td></tr>
+        <tr><td>C</td><td>0</td><td>2</td><td>0</td></tr>
+        <tr><td>D</td><td>0</td><td>−2</td><td>0</td></tr>
+        <tr><td>E</td><td>0</td><td>0</td><td>1</td></tr>
+        <tr><td>F</td><td>0</td><td>0</td><td>−1</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3>Centrage des données</h3>
+    <p><strong>Centrer</strong> une variable consiste à soustraire sa moyenne
+    à chacune de ses observations. Le centre du nuage est ainsi placé à
+    l'origine, sans changer les distances entre observations :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><msup><msub><mi>x</mi><mi>i</mi></msub><mi>centré</mi></msup><mo>=</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover><mi>x</mi><mo>¯</mo></mover></math></div>
+    <p>Dans notre exemple, les trois moyennes valent déjà zéro :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mover><mi>x</mi><mo>¯</mo></mover><mo>=</mo><mfrac><mrow><mn>3</mn><mo>+</mo><mn>−3</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn></mrow><mn>6</mn></mfrac><mo>=</mo><mn>0</mn></math></div>
+    <p>De même, <span class="math">ȳ = 0</span> et
+    <span class="math">z̄ = 0</span>. <strong>Les données sont donc déjà
+    centrées :</strong> il n'est pas nécessaire de modifier leurs valeurs.</p>
+
+    <h3>Matrice des observations</h3>
+    <p>Dans le cas général, la matrice <span class="math">X</span>
+    est de dimension <span class="math">n × p</span> : une ligne par
+    observation, une colonne par variable. Ici,
+    <span class="math">n = 6</span> et <span class="math">p = 3</span> :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mi>X</mi><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>3</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>-3</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>-2</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>-1</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow></math></div>
+
+    <h3>Calcul de la matrice de covariance</h3>
+    <p>La formule générale de la matrice de covariance des observations
+    centrées est :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mi>Σ</mi><mo>=</mo><mfrac><mrow><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></mfrac></math></div>
+    <p>La notation <span class="math">Xᵀ</span> désigne la <strong>transposée</strong> de la matrice <span class="math">X</span> : on échange ses lignes et ses colonnes. Notre matrice <span class="math">X</span> contient 6 lignes et 3 colonnes ; sa transposée <span class="math">Xᵀ</span> contient donc 3 lignes et 6 colonnes.</p>
+    <p>En remplaçant les symboles par les valeurs des six observations, on effectue <strong>la multiplication des deux matrices</strong> :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing=".9em" rowspacing=".35em"><mtr><mtd><mn>3</mn></mtd><mtd><mn>-3</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>-2</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>-1</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow><mo>×</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing=".9em" rowspacing=".35em"><mtr><mtd><mn>3</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>-3</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>-2</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>-1</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing=".9em" rowspacing=".35em"><mtr><mtd><mn>18</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>8</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>2</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow></math></div>
+    <p>On obtient une matrice <strong>3 × 3</strong> : chaque coefficient est calculé en multipliant une ligne de <span class="math">Xᵀ</span> par une colonne de <span class="math">X</span>. Par exemple, le coefficient en haut à gauche est calculé avec la première ligne <span class="math">(3, −3, 0, 0, 0, 0)</span> et la première colonne de <span class="math">X</span>, qui est identique.</p>
+    <p>Le coefficient <span class="math">18</span> correspond à
+    <span class="math">3² + (−3)²</span>, le coefficient
+    <span class="math">8</span> à <span class="math">2² + (−2)²</span>,
+    et le coefficient <span class="math">2</span> à
+    <span class="math">1² + (−1)²</span>. Les coefficients non diagonaux
+    sont nuls car, dans notre jeu de données, les produits de coordonnées
+    de deux variables différentes sont toujours nuls.</p>
+    <p>En remplaçant dans la formule :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mi>Σ</mi><mo>=</mo><mfrac><mn>1</mn><mn>5</mn></mfrac><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>18</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>8</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>2</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>3,6</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1,6</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0,4</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow></math></div>
+    <p>Les coefficients diagonaux sont les variances :
+    <strong>3,6 pour x</strong>, <strong>1,6 pour y</strong> et
+    <strong>0,4 pour z</strong>. Les autres coefficients sont les
+    covariances entre variables.</p>
+
+    <h3>Vecteurs propres et composantes principales</h3>
+    <p>Les directions principales sont les <strong>vecteurs propres</strong>
+    de la matrice de covariance. La relation générale est :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mi>Σ</mi><msub><mi>u</mi><mi>j</mi></msub><mo>=</mo><msub><mi>λ</mi><mi>j</mi></msub><msub><mi>u</mi><mi>j</mi></msub></math></div>
+    <p><span class="math">uⱼ</span> est une direction et
+    <span class="math">λⱼ</span> la variance sur cette direction.
+    Comme la matrice de covariance de notre exemple est diagonale,
+    ses vecteurs propres sont simplement les trois axes d'origine :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>u</mi><mn>1</mn></msub><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow><mspace width="1.5em"></mspace><msub><mi>u</mi><mn>2</mn></msub><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow><mspace width="1.5em"></mspace><msub><mi>u</mi><mn>3</mn></msub><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow></math></div>
+    <p>Leurs valeurs propres sont
+    <span class="math">λ₁ = 3,6</span>,
+    <span class="math">λ₂ = 1,6</span>,
+    <span class="math">λ₃ = 0,4</span>.
+    Les composantes, classées par variance décroissante, sont donc
+    <strong>PC1 = x</strong>, <strong>PC2 = y</strong> et
+    <strong>PC3 = z</strong>. Dans d'autres données, les axes principaux
+    peuvent être inclinés par rapport aux axes d'origine.</p>
+
+    <h3>Projection de trois dimensions vers deux</h3>
+    <p>Nous conservons les deux premières directions dans la matrice
+    <span class="math">U</span>, de dimension <span class="math">3 × 2</span> :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mi>U</mi><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow></math></div>
+    <p>La formule générale des coordonnées projetées est
+    <span class="math">Z = XU</span>. Ici, le calcul devient :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mi>Z</mi><mo>=</mo><mi>X</mi><mi>U</mi><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>3</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>-3</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>-2</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>-1</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow><mo>=</mo><mrow><mo stretchy="true">[</mo><mtable columnspacing="1.15em" rowspacing=".35em"><mtr><mtd><mn>3</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>-3</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>-2</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr></mtable><mo stretchy="true">]</mo></mrow></math></div>
+    <p>Nous obtenons deux coordonnées par observation :</p>
+    <div class="comparison-table"><table>
+      <thead><tr><th>Observation</th><th>Avant (3D)</th><th>Après (2D)</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>(3, 0, 0)</td><td>(3, 0)</td></tr>
+        <tr><td>B</td><td>(−3, 0, 0)</td><td>(−3, 0)</td></tr>
+        <tr><td>C</td><td>(0, 2, 0)</td><td>(0, 2)</td></tr>
+        <tr><td>D</td><td>(0, −2, 0)</td><td>(0, −2)</td></tr>
+        <tr><td>E</td><td>(0, 0, 1)</td><td>(0, 0)</td></tr>
+        <tr><td>F</td><td>(0, 0, −1)</td><td>(0, 0)</td></tr>
+      </tbody>
+    </table></div>
+    <p>Les observations E et F ont désormais les mêmes coordonnées : leur
+    différence sur la variable z a été perdue lors de la projection.</p>
+
+    <h3>Variance expliquée et perte d'information</h3>
+    <p>La part de variance conservée par les deux premières composantes
+    est la somme de leurs valeurs propres divisée par la variance totale :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>r</mi><mn>2</mn></msub><mo>=</mo><mfrac><mrow><msub><mi>λ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>λ</mi><mn>2</mn></msub></mrow><mrow><msub><mi>λ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>λ</mi><mn>2</mn></msub><mo>+</mo><msub><mi>λ</mi><mn>3</mn></msub></mrow></mfrac><mo>=</mo><mfrac><mrow><mn>3,6</mn><mo>+</mo><mn>1,6</mn></mrow><mrow><mn>3,6</mn><mo>+</mo><mn>1,6</mn><mo>+</mo><mn>0,4</mn></mrow></mfrac><mo>≈</mo><mn>92,9</mn><mo>%</mo></math></div>
+    <p>En passant de 3D à 2D, nous conservons donc <strong>92,9 %</strong>
+    de la variance initiale, et nous en perdons <strong>7,1 %</strong>.</p>
+
+    <h3>Pourquoi ce plan est-il optimal ?</h3>
+    <p>Comparons trois plans possibles :</p>
+    <div class="comparison-table"><table>
+      <thead><tr><th>Plan</th><th>Variance conservée</th></tr></thead>
+      <tbody>
+        <tr><td>(x, y)</td><td><strong>3,6 + 1,6 = 5,2</strong></td></tr>
+        <tr><td>(x, z)</td><td>3,6 + 0,4 = 4,0</td></tr>
+        <tr><td>(y, z)</td><td>1,6 + 0,4 = 2,0</td></tr>
+      </tbody>
+    </table></div>
+    <p>Le plan (x, y) conserve davantage de variance. L'ACP recherche
+    en réalité le meilleur plan <strong>parmi tous les plans possibles</strong>,
+    y compris ceux qui sont inclinés. Cette optimisation s'écrit :</p>
+    <div class="pca-math-scroll"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><munder><mi>max</mi><mrow><msup><mi>U</mi><mi>T</mi></msup><mi>U</mi><mo>=</mo><msub><mi>I</mi><mn>2</mn></msub></mrow></munder><mrow><mi>tr</mi><mo>(</mo><msup><mi>U</mi><mi>T</mi></msup><mi>Σ</mi><mi>U</mi><mo>)</mo></mrow></math></div>
+    <p>La contrainte <span class="math">UᵀU = I₂</span> impose des axes
+    orthonormés ; <span class="math">tr</span> désigne la somme des
+    termes diagonaux. Dans notre exemple, le maximum vaut
+    <strong>5,2</strong> et est atteint pour le plan (x, y).
+    <strong>C'est le principe de l'ACP : conserver le plus de variance
+    possible avec moins de dimensions.</strong></p>
+    
+  </div>
+</details>
+
+
+<section class="references"><h2>Références</h2><ol>
+<li>Jolliffe et Cadima (2016), <a href="https://doi.org/10.1098/rsta.2015.0202" target="_blank" rel="noopener"><i>Principal component analysis: a review and recent developments</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html" target="_blank" rel="noopener">scikit-learn — PCA</a> : composantes et variance expliquée.</li>
+</ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/vendor/d3.v7.min.js"></script>
+<script>
+if (!window.d3) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"><\/script>');
+}
+</script>
+<script src="../assets/js/acp.js"></script>
+</body></html>

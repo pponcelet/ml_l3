@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Naive Bayes — Apprentissage automatique</title>
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="sup-algo-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+  <div class="eyebrow">APPRENTISSAGE SUPERVISÉ · CLASSIFICATION</div>
+  <h1>Naive Bayes</h1>
+  <p class="lead">Classer une observation à partir des probabilités conditionnelles de ses variables, en supposant celles-ci indépendantes une fois la classe connue.</p>
+
+  <h2>1. Principe</h2>
+  <p>Naive Bayes est un <strong>classifieur probabiliste</strong> : pour une observation donnée, il estime la probabilité de chaque classe en combinant une probabilité <em>a priori</em> et les probabilités conditionnelles des variables. Il choisit ensuite la classe dont la probabilité <em>a posteriori</em> est la plus grande.</p>
+  <p>Son hypothèse dite « naïve » est que les variables sont <strong>conditionnellement indépendantes sachant la classe</strong>. Cette hypothèse simplifie les calculs, même lorsqu’elle n’est pas parfaitement satisfaite.</p>
+  <div class="concept-grid">
+    <div class="concept"><strong>Probabilité a priori</strong><p>Fréquence attendue d’une classe avant de connaître les variables de l’observation.</p></div>
+    <div class="concept"><strong>Vraisemblance</strong><p>Probabilité des valeurs observées des variables lorsque la classe est fixée.</p></div>
+  </div>
+
+  <h2>2. Algorithme général</h2>
+  <div class="algorithm"><ol>
+    <li>À partir des observations étiquetées, estimez la probabilité a priori de chaque classe.</li>
+    <li>Pour chaque classe et chaque variable, estimez la distribution conditionnelle. Dans le cas gaussien, on calcule sa moyenne et sa variance.</li>
+    <li>Pour une nouvelle observation, combinez les distributions conditionnelles avec les probabilités a priori.</li>
+    <li>Normalisez les scores pour obtenir les probabilités des classes, puis choisissez la plus élevée.</li>
+  </ol></div>
+
+  <h2>3. Expérimentation</h2>
+  <div class="lab sup-lab nb-lab" id="nb-lab">
+    <div class="sup-controls nb-controls">
+      <label for="nb-dataset">Jeu de données
+        <select id="nb-dataset">
+          <option value="blobs">Deux groupes</option>
+          <option value="inclined">Groupes inclinés</option>
+          <option value="xor">Groupes en damier (XOR)</option>
+        </select>
+      </label>
+      <label for="nb-prior">Probabilité a priori de la classe bleue
+        <output id="nb-prior-value">50 %</output>
+        <input type="range" min="10" max="90" step="5" value="50" id="nb-prior">
+      </label>
+      <label for="nb-smoothing">Lissage de la variance
+        <output id="nb-smoothing-value">0,05</output>
+        <input type="range" min="0" max="0.5" step="0.05" value="0.05" id="nb-smoothing">
+      </label>
+      <div class="sup-control-button">
+        <button class="btn secondary" id="nb-seed" type="button">Nouvelles observations</button>
+      </div>
+    </div>
+    <div class="sup-panels nb-panels">
+      <section class="sup-card">
+        <h3>Observations et zones de décision</h3>
+        <div id="nb-plot" class="chart"></div>
+        <p class="small nb-plot-help">Cliquez dans le graphique pour placer une nouvelle observation et calculer ses probabilités.</p>
+      </section>
+      <section class="sup-card">
+        <h3>Distributions des variables par classe</h3>
+        <div class="nb-legend"><span><i class="nb-dot nb-blue"></i>Classe bleue</span><span><i class="nb-dot nb-orange"></i>Classe orange</span></div>
+        <div class="nb-density" id="nb-density-x"></div>
+        <div class="nb-density" id="nb-density-y"></div>
+        <div class="nb-posteriors" aria-live="polite">
+          <strong>Probabilités pour l’observation sélectionnée</strong>
+          <p class="nb-chosen" id="nb-chosen">—</p>
+          <div class="nb-prob-row"><span>Classe bleue</span><div class="nb-track"><span id="nb-bar-blue"></span></div><strong id="nb-prob-blue">—</strong></div>
+          <div class="nb-prob-row"><span>Classe orange</span><div class="nb-track"><span id="nb-bar-orange"></span></div><strong id="nb-prob-orange">—</strong></div>
+          <p class="small" id="nb-prediction">—</p>
+        </div>
+      </section>
+    </div>
+    <div class="stats nb-stats">
+      <div><span>Exactitude sur l'entraînement</span><strong id="nb-accuracy">—</strong></div>
+      <div><span>Observations</span><strong id="nb-count">—</strong></div>
+    </div>
+    <div class="sup-explain nb-explain"><strong>À observer</strong>
+      <p id="nb-insight">Modifiez les probabilités a priori pour observer comment la frontière change, sans déplacer les observations.</p>
+      <p>L’hypothèse d’indépendance conduit à estimer séparément les distributions de chaque variable : les courbes affichées sont celles du modèle, et non les histogrammes des observations.</p>
+    </div>
+  </div>
+
+  <h2>4. Avantages et limites</h2>
+  <div class="proscons">
+    <div><h3>Avantages</h3><ul>
+      <li>Apprentissage et prédiction rapides.</li>
+      <li>Fournit des scores de probabilité par classe.</li>
+      <li>Utile notamment pour la classification de textes, avec des variantes adaptées aux données.</li>
+    </ul></div>
+    <div><h3>Limites</h3><ul>
+      <li>L’indépendance conditionnelle des variables est rarement exacte.</li>
+      <li>Le modèle gaussien suppose une distribution normale pour chaque variable dans chaque classe.</li>
+      <li>Les probabilités estimées ne sont pas nécessairement bien calibrées ; des structures non linéaires complexes peuvent être mal représentées.</li>
+    </ul></div>
+  </div>
+
+  <h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi parle-t-on d'hypothèse d'indépendance « naïve » ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Le modèle suppose que les variables explicatives sont indépendantes les unes des autres lorsque la classe est fixée. Cela permet de factoriser leur vraisemblance, mais cette hypothèse n&#x27;est pas toujours réaliste.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Quel effet a la modification de la probabilité a priori d'une classe ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>À vraisemblances égales, une classe ayant un a priori plus élevé obtient un score a posteriori plus important. La frontière de décision se déplace alors en faveur de cette classe, même si les positions des observations n&#x27;ont pas changé.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi le cas XOR est-il difficile pour un Naive Bayes gaussien ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Dans un damier XOR équilibré, chaque variable prise séparément apporte peu d&#x27;information sur la classe. La discrimination repose surtout sur leur interaction, que l&#x27;hypothèse d&#x27;indépendance conditionnelle ne modélise pas efficacement.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+    <div class="detail-content as-formal">
+      <h3>Théorème de Bayes</h3>
+      <p>Pour une classe <span class="math">c</span> et une observation <span class="math">x</span> :</p>
+      <div class="as-formula">P(c | x) = P(x | c) × P(c) / P(x)</div>
+      <p><span class="math">P(c)</span> est la probabilité a priori de la classe ; <span class="math">P(x | c)</span> est la vraisemblance des variables observées sachant la classe. Le terme <span class="math">P(x)</span> est commun à toutes les classes.</p>
+
+      <h3>Hypothèse d’indépendance conditionnelle</h3>
+      <p>Pour <span class="math">p</span> variables <span class="math">x₁, …, xₚ</span>, on suppose qu’elles sont indépendantes conditionnellement à la classe :</p>
+      <div class="as-formula">P(x | c) = ∏<sub>j=1…p</sub> P(x<sub>j</sub> | c)</div>
+      <p>Le score utilisé pour prédire est donc proportionnel à :</p>
+      <div class="as-formula">score(c | x) = P(c) × ∏<sub>j=1…p</sub> P(x<sub>j</sub> | c)</div>
+
+      <h3>Naive Bayes gaussien</h3>
+      <p>Pour une variable numérique, on suppose que sa distribution dans chaque classe suit une loi normale :</p>
+      <div class="as-formula">p(x<sub>j</sub> | c) = [1 / √(2πσ²<sub>cj</sub>)] × exp[−(x<sub>j</sub> − μ<sub>cj</sub>)² / (2σ²<sub>cj</sub>)]</div>
+      <p>Les paramètres <span class="math">μ<sub>cj</sub></span> et <span class="math">σ²<sub>cj</sub></span> sont respectivement la moyenne et la variance estimées pour la variable <span class="math">j</span> dans la classe <span class="math">c</span>.</p>
+
+      <h3>Rôle du lissage</h3>
+      <p>Pour éviter des variances nulles ou trop faibles, on peut ajouter une petite valeur positive aux variances estimées :</p>
+      <div class="as-formula">σ²<sub>cj, utilisée</sub> = σ²<sub>cj, estimée</sub> + ε × max<sub>c,j</sub>(σ²<sub>cj, estimée</sub>)</div>
+      <p>Dans l’expérimentation, le curseur règle <span class="math">ε</span> : augmenter le lissage élargit les distributions et peut déplacer la frontière de décision.</p>
+
+      <h3>Exemple numérique : deux classes, deux variables</h3>
+      <p>Supposons les deux classes équiprobables et les distributions suivantes :</p>
+      <div class="comparison-table"><table>
+        <thead><tr><th>Classe</th><th>P(c)</th><th>Moyenne x₁</th><th>Moyenne x₂</th><th>Variances</th></tr></thead>
+        <tbody>
+          <tr><td>Bleue (A)</td><td>0,5</td><td>2</td><td>2</td><td>1 et 1</td></tr>
+          <tr><td>Orange (B)</td><td>0,5</td><td>5</td><td>5</td><td>1 et 1</td></tr>
+        </tbody></table></div>
+      <p>Pour l’observation <span class="math">x = (3,5 ; 3)</span>, les distances quadratiques aux moyennes de A et B sont :</p>
+      <div class="as-formula">d²<sub>A</sub> = (3,5 − 2)² + (3 − 2)² = 3,25</div>
+      <div class="as-formula">d²<sub>B</sub> = (3,5 − 5)² + (3 − 5)² = 6,25</div>
+      <p>Les deux facteurs normalisateurs gaussiens sont identiques et s’annulent lorsque les scores sont normalisés :</p>
+      <div class="as-formula">score(A) ∝ 0,5 × exp(−3,25 / 2) ≈ 0,0985</div>
+      <div class="as-formula">score(B) ∝ 0,5 × exp(−6,25 / 2) ≈ 0,0220</div>
+      <p>En divisant chaque score par la somme des deux, nous obtenons :</p>
+      <div class="as-formula">P(A | x) ≈ 81,8 % ; P(B | x) ≈ 18,2 %</div>
+      <p>L’observation est donc affectée à la <strong>classe A</strong>. Dans l’expérimentation, vous pouvez reproduire ce principe en déplaçant le point de prédiction.</p>
+      <h3>Stabilité numérique</h3>
+      <p>Pour éviter de multiplier de très petites valeurs, on utilise en pratique les logarithmes :</p>
+      <div class="as-formula">log score(c | x) = log P(c) + Σ<sub>j=1…p</sub> log p(x<sub>j</sub> | c)</div>
+      <p>Choisir la classe de plus grand score logarithmique revient à choisir celle de plus grand score initial.</p>
+    </div>
+  </details>
+
+  <section class="references"><h2>Références</h2><ol>
+    <li><a href="https://scikit-learn.org/stable/modules/naive_bayes.html" target="_blank" rel="noopener">scikit-learn, <i>Naive Bayes</i></a>.</li>
+    <li>Murphy (2022), <i>Probabilistic Machine Learning: An Introduction</i>, MIT Press.</li>
+  </ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/naive-bayes.js"></script>
+</body>
+</html>

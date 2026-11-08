@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Observations et variables — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="fond-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div>
+<h1>Observations et variables</h1>
+<p class="lead">Identifier ce que contiennent les données, ce que le modèle doit apprendre et ce qui constitue une observation.</p>
+<h2>1. Principe</h2>
+<p>Un jeu de données peut être représenté sous forme d’un tableau : <strong>une ligne par observation</strong> et <strong>une colonne par variable</strong>. Les variables décrivent une observation. En apprentissage supervisé, on dispose également d’une <strong>cible</strong> à prédire.</p>
+<div class="comparison-table"><table>
+<thead><tr><th>Observation</th><th>Âge</th><th>Nombre de visites</th><th>Achat ?</th></tr></thead>
+<tbody><tr><td>Client A</td><td>22</td><td>2</td><td>Non</td></tr>
+<tr><td>Client B</td><td>45</td><td>8</td><td>Oui</td></tr>
+<tr><td>Client C</td><td>31</td><td>3</td><td>Non</td></tr>
+<tr><td>Client D</td><td>54</td><td>11</td><td>Oui</td></tr></tbody></table></div>
+<p>Ici, l’âge et le nombre de visites sont des <strong>variables explicatives</strong> ; « Achat ? » est la <strong>cible</strong>. Si l’on ne cherche pas à prédire l’achat, le tableau peut servir à explorer des profils de clients sans étiquettes.</p>
+<h2>2. Types de variables et de problèmes</h2>
+<div class="concept-grid">
+<div class="concept"><strong>Variable numérique</strong><p>Quantité mesurable, par exemple un âge, une température ou un montant.</p></div>
+<div class="concept"><strong>Variable catégorielle</strong><p>Modalité, par exemple un moyen de transport ou une région. Leur <a href="preparation.html">encodage</a> dépend du type de variable et du modèle.</p></div>
+<div class="concept"><strong>Classification</strong><p>Cible catégorielle : achat / pas d’achat, courriel normal / indésirable.</p></div>
+<div class="concept"><strong>Régression</strong><p>Cible numérique : prix d’un logement, durée d’un trajet, consommation.</p></div>
+</div>
+<h2>3. Décrire un jeu de données</h2>
+<div class="algorithm"><ol>
+<li>Repérez ce qui constitue une observation (personne, produit, image, événement…).</li>
+<li>Identifiez les variables disponibles et leur signification.</li>
+<li>Déterminez s’il existe une cible et précisez sa nature.</li>
+<li>Examinez les valeurs manquantes, doublons, unités et données potentiellement erronées.</li>
+<li>Recherchez les variables qui divulgueraient directement la réponse attendue.</li>
+</ol></div>
+<p>Pour aller plus loin dans la description des observations, étudiez les <a href="exploration.html">statistiques descriptives et les représentations graphiques</a>.</p>
+<h2>4. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Si l’on cherche à prédire le montant d’un achat plutôt que sa réalisation, change-t-on de type de problème ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Oui. Prédire si un achat aura lieu relève de la classification ; prédire un montant numérique relève de la régression. Le type de problème dépend de la variable cible à prédire.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Une colonne contenant le résultat de l’achat peut-elle servir de variable explicative pour prédire ce même achat ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Non, si cette colonne décrit précisément le résultat recherché et n&#x27;est connue qu&#x27;après l&#x27;achat. L&#x27;utiliser donnerait au modèle une information indisponible au moment de la prédiction : c&#x27;est une fuite de données.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Comment <a href="preparation.html">encoder</a> une variable « ville » si l’algorithme attend uniquement des nombres ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Pour une ville, variable nominale sans ordre naturel, on peut utiliser un encodage one-hot. Un codage 1, 2, 3 créerait artificiellement un ordre et des distances numériques entre les villes.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+<h3>Matrice de données</h3><p>On note <span class="math">X ∈ ℝ<sup>n×p</sup></span> la matrice des variables numériques, avec <span class="math">n</span> observations et <span class="math">p</span> variables. La ligne <span class="math">x<sub>i</sub></span> décrit la i-ième observation.</p>
+<p>Pour les quatre clients ci-dessus, avec l’âge et le nombre de visites :</p>
+<div class="fond-formula"><math display="block" aria-label="X, matrice 4 lignes par 2 colonnes">
+<mi>X</mi><mo>=</mo><mo>(</mo><mtable>
+<mtr><mtd><mn>22</mn></mtd><mtd><mn>2</mn></mtd></mtr>
+<mtr><mtd><mn>45</mn></mtd><mtd><mn>8</mn></mtd></mtr>
+<mtr><mtd><mn>31</mn></mtd><mtd><mn>3</mn></mtd></mtr>
+<mtr><mtd><mn>54</mn></mtd><mtd><mn>11</mn></mtd></mtr>
+</mtable><mo>)</mo></math></div>
+<p>La cible est <span class="math">y = (0,1,0,1)</span>, où 1 signifie « achat ». En supervisé, l’ensemble d’apprentissage contient des couples <span class="math">(x<sub>i</sub>, y<sub>i</sub>)</span>. En non supervisé, on considère les <span class="math">x<sub>i</sub></span> sans utiliser de cibles connues.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://scikit-learn.org/stable/getting_started.html" target="_blank" rel="noopener">scikit-learn, <i>Getting started</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/preprocessing.html" target="_blank" rel="noopener">scikit-learn, <i>Preprocessing data</i></a>.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main>
+<script src="../assets/js/site.js"></script>
+</body></html>

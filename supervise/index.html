@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Apprentissage supervisé — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE SUPERVISÉ</div>
+<h1>Apprentissage supervisé</h1>
+<p class="lead">Apprendre à prédire une sortie à partir d’exemples dont la réponse est connue.</p>
+
+<h2>1. Principe</h2><p>En apprentissage supervisé, chaque observation d’entraînement possède une <strong>cible</strong> (étiquette ou valeur). L’objectif est d’apprendre une règle qui généralise à de nouvelles observations.</p>
+<div class="concept-grid"><div class="concept"><strong>Classification</strong><p>Prédire une catégorie : courrier indésirable / non indésirable, espèce d’une fleur, etc.</p><p><a href="classification.html">Découvrir la classification</a></p></div><div class="concept"><strong>Régression</strong><p>Prédire une quantité : prix, température ou consommation.</p><p><a href="regression.html">Découvrir la régression</a></p></div></div>
+<h2>2. Démarche générale</h2><div class="algorithm"><ol><li>Définissez la cible et réunissez les exemples.</li><li>Séparez les données pour l’apprentissage et pour l’évaluation.</li><li>Entraînez un modèle sur les exemples d’apprentissage.</li><li>Évaluez-le sur des données non utilisées pour l’ajustement.</li><li>Interprétez les erreurs, la généralisation et les limites du modèle.</li></ol></div>
+<h2>3. Méthodes de classification</h2><p>Plusieurs approches permettent de construire une prédiction : <a href="naive-bayes.html">Naive Bayes</a> combine les probabilités conditionnelles des variables, la <a href="logistique.html">régression logistique</a> estime une probabilité à partir d'un score linéaire, les <a href="knn.html">k plus proches voisins</a> utilisent les distances, les <a href="arbre-decision.html">arbres de décision</a> apprennent des règles de séparation et les <a href="svm.html">SVM</a> recherchent une frontière à grande marge.</p>
+<p>Vous pouvez également <a href="comparaison.html">comparer Naive Bayes, KNN, l'arbre de décision et le SVM</a> sur les mêmes observations.</p>
+<p>Les notions de <a href="../fondamentaux/validation.html">validation</a> et d’<a href="../fondamentaux/evaluation.html">évaluation</a> sont communes à toutes ces méthodes.</p>
+<h2>4. Points de vigilance</h2><ul><li>Le jeu de test doit rester indépendant de l’apprentissage et du choix des hyperparamètres.</li><li>Les données peuvent être déséquilibrées : la métrique d’évaluation doit correspondre au problème.</li><li>Des données d’entraînement peu représentatives peuvent limiter la généralisation du modèle.</li></ul>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Qu'appelle-t-on une variable cible en apprentissage supervisé ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>C&#x27;est la valeur ou l&#x27;étiquette que l&#x27;on souhaite prédire à partir des variables explicatives. Elle est connue pour les observations d&#x27;entraînement, mais inconnue pour une nouvelle observation à classifier ou à estimer.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Pourquoi faut-il distinguer validation et test ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La validation sert à choisir un modèle ou ses hyperparamètres. Le test doit rester indépendant de ces choix afin de fournir une estimation finale moins biaisée des performances sur des données non vues.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Tous les algorithmes supervisés demandent-ils la même préparation des données ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Non. KNN et SVM sont souvent sensibles à l&#x27;échelle des variables ; les arbres de décision le sont généralement moins pour des variables numériques. Les variables catégorielles et manquantes doivent aussi être traitées selon le modèle.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content as-formal">
+
+<h3>Ensemble d'apprentissage et prédiction</h3>
+<p>Un jeu d'entraînement contient <span class="math">n</span> couples <span class="math">(x<sub>i</sub>, y<sub>i</sub>)</span>. Le modèle <span class="math">f</span> apprend à associer une prédiction à chaque observation : <span class="math">ŷ<sub>i</sub> = f(x<sub>i</sub>)</span>.</p>
+<h3>Erreur empirique</h3>
+<p>Une fonction de perte <span class="math">ℓ</span> mesure l'écart entre prédiction et cible. L'erreur moyenne sur l'entraînement s'écrit :</p>
+<div class="as-formula">R<sub>n</sub>(f) = (1/n) × Σ<sub>i=1…n</sub> ℓ(f(x<sub>i</sub>), y<sub>i</sub>)</div>
+<p>En classification, si la perte vaut 1 pour une erreur et 0 sinon, un modèle commettant une erreur sur cinq exemples a une erreur empirique de :</p>
+<div class="as-formula">R<sub>5</sub>(f) = (0 + 0 + 1 + 0 + 0) / 5 = 0,20</div>
+<h3>Généralisation</h3>
+<p>Une faible erreur sur l'entraînement ne garantit pas de bonnes prédictions sur de nouvelles observations. Les hyperparamètres se choisissent sur un ensemble de validation (ou par validation croisée) ; le jeu de test est réservé à l'évaluation finale.</p>
+
+</div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank" rel="noopener">scikit-learn, <i>Supervised learning</i></a></li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Arbre de décision — Apprentissage automatique</title><link rel="stylesheet" href="../assets/css/style.css"></head>
+<body data-root="../" class="sup-algo-page"><aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside><main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">APPRENTISSAGE SUPERVISÉ · CLASSIFICATION</div><h1>Arbre de décision</h1>
+<p class="lead">Classer des observations en appliquant une suite de règles simples sur leurs caractéristiques.</p>
+<h2>1. Principe</h2>
+<p>Un arbre de décision partage progressivement les observations en groupes de plus en plus homogènes. À chaque nœud, une condition sur une variable sépare les observations en deux sous-ensembles. Une <strong>feuille</strong> attribue finalement une classe.</p>
+<p>Un arbre trop profond peut mémoriser les particularités de l'échantillon d'apprentissage : c'est le <strong>surapprentissage</strong>. Limiter sa profondeur ou imposer un nombre minimal d'observations par feuille permet de maîtriser sa complexité.</p>
+<h2>2. Algorithme général</h2><div class="algorithm"><ol><li>Placez toutes les observations d'apprentissage à la racine.</li><li>Recherchez la variable et le seuil qui améliorent le plus la séparation des classes.</li><li>Répartissez les observations selon la condition retenue.</li><li>Recommencez pour chaque sous-ensemble jusqu'à atteindre un critère d'arrêt.</li><li>Attribuez à chaque feuille la classe majoritaire.</li></ol></div>
+<h2>3. Expérimentation</h2><p>Modifiez la profondeur maximale ou la taille minimale des feuilles. Observez comment les règles de l'arbre construisent une frontière de décision composée de segments horizontaux et verticaux.</p>
+<div class="lab sup-lab" id="dt-lab"><div class="sup-controls">
+<label for="dt-dataset">Jeu de données<select id="dt-dataset"><option value="blobs">Deux groupes</option><option value="moons">Deux lunes</option><option value="circles">Cercles concentriques</option></select></label>
+<label for="dt-depth">Profondeur maximale <output id="dt-depth-value">3</output><input type="range" id="dt-depth" min="1" max="5" value="3"></label>
+<label for="dt-leaf">Observations min. par feuille <output id="dt-leaf-value">5</output><input type="range" id="dt-leaf" min="2" max="15" value="5"></label>
+<div class="sup-control-button"><button class="btn secondary" type="button" id="dt-seed">Nouvelles observations</button></div></div>
+<div class="sup-panels"><section class="sup-card"><h3>Observations et zones de décision</h3><div class="chart" id="dt-plot"></div></section><section class="sup-card"><h3>Arbre obtenu</h3><div class="chart sup-tree-chart" id="dt-tree"></div></section></div>
+<div class="stats"><div><span>Découpages</span><strong id="dt-splits">—</strong></div><div><span>Feuilles</span><strong id="dt-leaves">—</strong></div><div><span>Exactitude sur l'entraînement</span><strong id="dt-accuracy">—</strong></div></div><p class="lab-help">Les régions légèrement colorées indiquent les classes prédites. Les couleurs des feuilles correspondent aux classes 1 (bleu) et 2 (orange).</p></div>
+<h2>4. Avantages et limites</h2><div class="proscons"><div><h3>Avantages</h3><ul><li>Décisions interprétables sous forme de règles.</li><li>Gère naturellement les relations non linéaires et les interactions entre variables.</li><li>Ne nécessite pas de standardisation pour les seuils usuels.</li></ul></div><div><h3>Limites</h3><ul><li>Peut surapprendre si l'arbre devient trop complexe.</li><li>Instable lorsque de petits changements des données modifient les premiers découpages.</li><li>Frontières en escalier pour les découpages parallèles aux axes.</li></ul></div></div>
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi un arbre très profond peut-il surapprendre ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Il peut découper les données en feuilles qui contiennent très peu d&#x27;observations et mémoriser des particularités de l&#x27;entraînement. Ces règles très spécifiques peuvent être moins fiables sur de nouveaux exemples.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Que constatez-vous lorsque vous augmentez le nombre minimal d'observations par feuille ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Les feuilles doivent contenir davantage d&#x27;observations, ce qui limite certains découpages fins et rend souvent l&#x27;arbre plus simple. Cela peut réduire le surapprentissage, mais aussi empêcher de capter une structure réellement utile.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi les frontières de décision d'un arbre sont-elles souvent en escalier ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Dans un arbre à seuils sur une variable à la fois, chaque question est du type x ≤ t ou y ≤ t. Les régions obtenues sont délimitées par des segments parallèles aux axes et créent des contours rectangulaires.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content as-formal">
+<h3>Mesurer l'impureté d'un nœud</h3>
+<p>Pour un nœud contenant des observations réparties dans <span class="math">C</span> classes, on note <span class="math">p<sub>c</sub></span> la proportion d'observations de classe <span class="math">c</span>. L'<strong>impureté de Gini</strong> est :</p>
+<div class="as-formula">Gini(T) = 1 − Σ<sub>c=1…C</sub> p<sub>c</sub><sup>2</sup></div>
+<p>Par exemple, un nœud contenant six observations de la classe 1 et quatre de la classe 2 possède une impureté de :</p>
+<div class="as-formula">Gini(T) = 1 − (6/10)<sup>2</sup> − (4/10)<sup>2</sup> = 0,48</div>
+<h3>Choisir un découpage</h3><p>Supposons qu'un seuil partage ces dix observations en deux groupes : à gauche, cinq observations de classe 1 ; à droite, une observation de classe 1 et quatre de classe 2.</p>
+<div class="comparison-table"><table><thead><tr><th>Nœud</th><th>Classe 1</th><th>Classe 2</th><th>Impureté</th></tr></thead><tbody><tr><td>Avant séparation</td><td>6</td><td>4</td><td>0,48</td></tr><tr><td>Gauche</td><td>5</td><td>0</td><td>0</td></tr><tr><td>Droite</td><td>1</td><td>4</td><td>1 − (1/5)² − (4/5)² = 0,32</td></tr></tbody></table></div>
+<p>La qualité d'un découpage est calculée par la moyenne des impuretés des deux enfants, pondérée par leurs effectifs :</p>
+<div class="as-formula">Gini<sub>après</sub> = (n<sub>G</sub>/n) Gini(G) + (n<sub>D</sub>/n) Gini(D)</div>
+<p>Dans notre exemple :</p><div class="as-formula">Gini<sub>après</sub> = (5/10) × 0 + (5/10) × 0,32 = 0,16</div>
+<p>Le gain obtenu est <strong>0,48 − 0,16 = 0,32</strong>. L'algorithme privilégie le découpage qui réduit le plus l'impureté.</p>
+<h3>Prédiction dans une feuille</h3><p>Une nouvelle observation traverse successivement les conditions, puis reçoit la classe majoritaire de la feuille atteinte. La profondeur maximale et l'effectif minimal par feuille contrôlent la complexité de ce modèle.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol><li>Breiman, Friedman, Olshen et Stone (1984), <i>Classification and Regression Trees</i>.</li><li><a href="https://scikit-learn.org/stable/modules/tree.html" target="_blank" rel="noopener">scikit-learn, <i>Decision Trees</i></a>.</li></ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main><script src="../assets/js/site.js"></script><script src="../assets/js/supervised-viz.js"></script></body></html>

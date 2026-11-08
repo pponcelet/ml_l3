@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Préparation des données — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="fond-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div>
+<h1>Préparation des données</h1>
+<p class="lead">Transformer les observations en variables exploitables par un modèle, sans introduire d'information provenant des données de test.</p>
+<p>Avant de transformer les données, commencez par les <a href="exploration.html">explorer et décrire leurs distributions</a>.</p>
+
+<h2>1. Principe</h2>
+<p>Les données contiennent souvent des <strong>catégories</strong>, des <strong>valeurs manquantes</strong> ou des observations à examiner. Leur préparation dépend de la nature des variables et de l'algorithme utilisé. Il ne faut pas appliquer systématiquement la même transformation à toutes les colonnes.</p>
+<div class="concept-grid">
+  <div class="concept"><strong>Variable catégorielle nominale</strong><p>Les modalités n'ont pas d'ordre naturel : voiture, vélo, train. Les convertir directement en 1, 2, 3 introduirait un ordre arbitraire.</p></div>
+  <div class="concept"><strong>Variable catégorielle ordinale</strong><p>Les modalités sont ordonnées : faible, moyen, élevé. Un codage ordonné est possible, mais les écarts numériques ne représentent pas nécessairement des différences égales.</p></div>
+</div>
+
+<h2>2. Transformer les variables catégorielles</h2>
+<p>Deux encodages usuels sont l'<strong>encodage ordinal</strong> et le <strong>one-hot encoding</strong>. Le premier attribue un nombre à chaque modalité ; le second crée une colonne binaire par modalité. Le choix dépend du type de variable et du modèle utilisé.</p>
+<p class="note"><strong>Attention :</strong> un encodage ordinal appliqué à des catégories nominales peut introduire des distances artificielles. Le one-hot encoding n'impose pas d'ordre, mais augmente le nombre de colonnes. Certains algorithmes, notamment certains arbres, peuvent également disposer de traitements spécifiques des catégories.</p>
+
+<h2>3. Traiter les valeurs manquantes</h2>
+<p>Une valeur manquante ne correspond pas forcément à zéro. Selon le problème, on peut supprimer certaines observations, utiliser une modalité dédiée ou <strong>imputer</strong> une valeur estimée. Pour une variable numérique, la moyenne et la médiane sont deux possibilités simples.</p>
+<p>La moyenne est sensible aux valeurs extrêmes ; la médiane l'est généralement moins. Le choix doit également tenir compte de <strong>la raison pour laquelle une valeur manque</strong>. Une imputation ne garantit pas que l'information perdue soit retrouvée.</p>
+
+<h2>4. Vérifier la qualité des données</h2>
+<div class="algorithm"><ol>
+  <li><strong>Valeurs manquantes :</strong> mesurer leur fréquence et rechercher leur origine avant de choisir un traitement.</li>
+  <li><strong>Doublons :</strong> repérer les répétitions et déterminer si elles correspondent à une erreur ou à des observations distinctes.</li>
+  <li><strong>Valeurs aberrantes :</strong> vérifier les unités, les erreurs de saisie et les cas rares mais possibles avant de supprimer une observation.</li>
+  <li><strong>Catégories nouvelles :</strong> prévoir le cas d'une modalité rencontrée au test mais absente pendant l'entraînement.</li>
+  <li><strong>Échelles des variables :</strong> selon l'algorithme, effectuer une <a href="pretraitement.html">normalisation ou une standardisation</a>.</li>
+</ol></div>
+
+<h2>5. Préparer les données sans fuite d'information</h2>
+<p>Les statistiques utilisées pour l'imputation, les modalités retenues par un encodeur et les paramètres de mise à l'échelle doivent être <strong>appris sur les données d'entraînement seulement</strong>. Les mêmes transformations sont ensuite appliquées à la validation et au test.</p>
+<p class="note"><strong>Exemple :</strong> si l'âge moyen vaut 30,8 dans l'entraînement, c'est cette moyenne qui sert à imputer les âges manquants du test. Recalculer la moyenne en intégrant les observations de test introduirait une fuite d'information.</p>
+
+<h2>6. Expérimentation</h2>
+<h3 class="fond-exp-heading">Encodage des variables catégorielles</h3>
+<p>Choisissez une variable et comparez sa représentation avant et après transformation.</p>
+<div class="lab fond-prepare-lab" id="fond-prepare-lab">
+  <div class="fond-prepare-controls">
+    <label for="fond-cat-variable">Variable
+      <select id="fond-cat-variable">
+        <option value="transport">Transport (nominale)</option>
+        <option value="niveau">Niveau de priorité (ordinale)</option>
+      </select>
+    </label>
+    <label for="fond-encoding">Transformation
+      <select id="fond-encoding">
+        <option value="onehot">One-hot encoding</option>
+        <option value="ordinal">Encodage ordinal</option>
+      </select>
+    </label>
+  </div>
+  <div class="fond-prepare-panels">
+    <section class="fond-prepare-panel" aria-label="Colonne avant transformation">
+      <h3>Avant transformation</h3>
+      <div class="comparison-table"><table id="fond-before-table"><thead><tr><th>Observation</th><th id="fond-before-name">Transport</th></tr></thead><tbody id="fond-before-body"></tbody></table></div>
+    </section>
+    <section class="fond-prepare-panel" aria-label="Colonnes après transformation">
+      <h3>Après transformation</h3>
+      <div class="comparison-table"><table id="fond-after-table"><thead id="fond-after-head"></thead><tbody id="fond-after-body"></tbody></table></div>
+    </section>
+  </div>
+  <p class="lab-help" id="fond-encoding-note" aria-live="polite"></p>
+</div>
+
+<h3 class="fond-exp-heading">Imputation des valeurs manquantes</h3>
+<p>Comparez l'imputation par la moyenne et par la médiane à partir des âges observés.</p>
+<div class="lab fond-impute-lab" id="fond-impute-lab">
+  <div class="fond-prepare-controls">
+    <label for="fond-impute-method">Imputation de l'âge manquant
+      <select id="fond-impute-method">
+        <option value="mean">Par la moyenne</option>
+        <option value="median">Par la médiane</option>
+      </select>
+    </label>
+  </div>
+  <div class="fond-prepare-panels">
+    <section class="fond-prepare-panel"><h3>Valeurs initiales</h3>
+      <div class="comparison-table"><table><thead><tr><th>Observation</th><th>Âge</th></tr></thead><tbody id="fond-impute-before"></tbody></table></div>
+    </section>
+    <section class="fond-prepare-panel"><h3>Après imputation</h3>
+      <div class="comparison-table"><table><thead><tr><th>Observation</th><th>Âge</th></tr></thead><tbody id="fond-impute-after"></tbody></table></div>
+    </section>
+  </div>
+  <p class="lab-help" id="fond-impute-result" aria-live="polite"></p>
+</div>
+
+<h2>7. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi le codage « voiture = 1, vélo = 2, train = 3 » est-il inadapté à une distance euclidienne ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Les numéros 1, 2 et 3 imposent un ordre et des écarts entre catégories qui n&#x27;en ont pas. Une distance euclidienne traiterait alors « voiture » et « vélo » comme plus proches que « voiture » et « train » sans justification.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Un encodage ordinal est-il nécessairement problématique pour une variable « faible, moyen, élevé » ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Pas nécessairement : faible, moyen et élevé sont bien ordonnés. Un encodage ordinal peut convenir à certains modèles, mais les écarts numériques entre niveaux restent une hypothèse à examiner, notamment pour les méthodes à distance.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Que se passe-t-il si une catégorie apparaît pour la première fois lors du test ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Il faut prévoir cette situation dès l&#x27;entraînement : ignorer la nouvelle modalité, la regrouper dans « autre » ou utiliser un traitement spécifique, selon le modèle. Modifier les colonnes après coup risquerait de rendre la représentation incohérente.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Dans quel cas la médiane serait-elle préférable à la moyenne pour une imputation ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La médiane est préférable lorsque la distribution est très asymétrique ou comporte des valeurs extrêmes. Contrairement à la moyenne, elle est peu influencée par quelques observations exceptionnellement grandes ou petites.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+<h3>Encodage one-hot</h3>
+<p>Pour une variable nominale prenant <span class="math">m</span> modalités, on construit un vecteur binaire de dimension <span class="math">m</span>, dont une seule coordonnée vaut 1 lorsque la modalité est connue et présente.</p>
+<div class="fond-formula">Voiture → (1, 0, 0) ; Vélo → (0, 1, 0) ; Train → (0, 0, 1).</div>
+<p>Deux modalités distinctes ont alors une distance euclidienne <span class="math">√2</span>. Avec un codage ordinal arbitraire 0, 1, 2, les distances seraient 1 ou 2 selon l'ordre retenu.</p>
+<h3>Imputation</h3>
+<p>Pour <span class="math">n</span> valeurs observées, la moyenne s'écrit :</p>
+<div class="fond-formula">μ = (1/n) × ∑<sub>i=1…n</sub> x<sub>i</sub></div>
+<p>Pour les cinq âges disponibles dans l'exemple :</p>
+<div class="fond-formula">μ = (22 + 35 + 29 + 40 + 28) / 5 = 30,8</div>
+<p>Après tri, les valeurs sont 22, 28, 29, 35, 40. Leur médiane vaut donc <span class="math">29</span>. Ces deux méthodes produisent des imputations différentes.</p>
+<h3>Apprentissage d'une transformation</h3>
+<p>On note <span class="math">T<sub>ent</sub></span> une transformation dont les paramètres ont été estimés sur l'ensemble d'entraînement. Les données de test sont transformées par <span class="math">T<sub>ent</sub>(X<sub>test</sub>)</span>, et non par une transformation réapprise sur le test.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://scikit-learn.org/stable/modules/preprocessing.html#encoding-categorical-features" target="_blank" rel="noopener">scikit-learn, <i>Encoding categorical features</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/impute.html" target="_blank" rel="noopener">scikit-learn, <i>Imputation of missing values</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener">scikit-learn, <i>Common pitfalls</i></a>.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main>
+<script src="../assets/js/site.js"></script><script src="../assets/js/preparation.js"></script>
+</body></html>

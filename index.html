@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Introduction à l’apprentissage automatique</title>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="fond-page" data-root="">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div>
+<h1>Introduction à l’apprentissage automatique</h1>
+<p class="lead">Apprendre à partir de données pour prédire des résultats ou découvrir des régularités.</p>
+
+<h2>1. Qu’est-ce que l’apprentissage automatique ?</h2>
+<p>L’apprentissage automatique (<i>machine learning</i>) regroupe des méthodes qui permettent de construire des modèles à partir d’observations. Plutôt que de définir à l’avance toutes les règles de décision, on <strong>ajuste un modèle sur des données</strong> pour qu’il puisse ensuite traiter de nouvelles observations.</p>
+<p>Selon le problème, le résultat attendu peut être une catégorie, une valeur numérique ou une structure présente dans les données. Le choix de la méthode dépend donc avant tout de <strong>la question posée</strong> et des informations disponibles.</p>
+
+<h2>2. Les principaux types de problèmes</h2>
+<div class="intro-goals">
+  <div class="concept">
+    <strong>Classification</strong>
+    <p>Prédire une catégorie à partir d’exemples dont la classe est connue : achat ou non-achat, courrier indésirable ou non.</p>
+    <p><a href="supervise/classification.html">Découvrir la classification</a></p>
+  </div>
+  <div class="concept">
+    <strong>Régression</strong>
+    <p>Prédire une valeur numérique à partir d’exemples : prix, température ou montant d’une consommation.</p>
+    <p><a href="supervise/regression.html">Découvrir la régression</a></p>
+  </div>
+  <div class="concept">
+    <strong>Exploration non supervisée</strong>
+    <p>Étudier des observations sans cible à prédire : rechercher des groupes, réduire la dimension ou découvrir des motifs fréquents.</p>
+    <p><a href="clustering/index.html">Clustering</a> · <a href="reduction/index.html">Réduction de dimension</a> · <a href="association/introduction.html">Fouille de motifs</a></p>
+  </div>
+</div>
+<p>La classification et la régression relèvent de <strong>l’apprentissage supervisé</strong> : les exemples d’entraînement disposent d’une réponse attendue. Dans les approches non supervisées, on explore la structure des données sans utiliser de cible pour guider l’apprentissage.</p>
+
+<h2>3. Un même jeu de données, plusieurs questions</h2>
+<p>Considérons des informations sur des clients : âge, nombre de visites, achats et montants dépensés. En fonction de l’objectif, on peut :</p>
+<ul>
+  <li><strong>Classer :</strong> prévoir si un client réalisera un achat.</li>
+  <li><strong>Prédire une valeur :</strong> estimer le montant d’un prochain achat.</li>
+  <li><strong>Regrouper :</strong> identifier des profils présentant des comportements similaires.</li>
+  <li><strong>Découvrir des motifs :</strong> rechercher des produits fréquemment achetés ensemble ou des successions d’achats.</li>
+</ul>
+<p>Les données ne déterminent donc pas, à elles seules, l’algorithme à utiliser : <strong>c’est le problème étudié qui guide la démarche</strong>.</p>
+
+<h2>4. La démarche d’apprentissage</h2>
+<div class="fond-steps">
+  <div><strong>1. Définir le problème</strong><p>Préciser l’objectif, la cible éventuelle et les critères permettant de juger le résultat.</p></div>
+  <div><strong>2. Examiner et préparer les données</strong><p>Identifier les observations et les variables, traiter les valeurs manquantes et organiser la séparation des données.</p></div>
+  <div><strong>3. Entraîner le modèle</strong><p>Choisir une méthode et ajuster ses paramètres sur les données d’entraînement.</p></div>
+  <div><strong>4. Valider et comparer</strong><p>Utiliser les données de validation ou la validation croisée pour choisir les réglages sans consulter le jeu de test.</p></div>
+  <div><strong>5. Tester et interpréter</strong><p>Mesurer la performance sur des observations réservées au test, examiner les erreurs et discuter les limites du modèle.</p></div>
+</div>
+<p class="note"><strong>Point essentiel :</strong> un modèle peut obtenir de très bons résultats sur les exemples utilisés pour l’entraîner et échouer sur de nouvelles observations. C’est pourquoi la <strong>généralisation</strong> et l’<strong>évaluation</strong> occupent une place centrale en apprentissage automatique.</p>
+
+<h2>5. Notions fondamentales</h2>
+<div class="hero-points">
+  <a class="link-card" href="fondamentaux/donnees.html"><span class="index">DONNÉES</span><strong>Observations et variables</strong><span>Décrire les observations, les variables explicatives et la cible éventuelle.</span></a>
+  <a class="link-card" href="fondamentaux/exploration.html"><span class="index">EXPLORATION</span><strong>Décrire et explorer un jeu de données</strong><span>Lire histogrammes, boxplots et corrélations, puis examiner des représentations en 2D et en 3D.</span></a>
+  <a class="link-card" href="fondamentaux/preparation.html"><span class="index">PRÉPARATION</span><strong>Préparation des données</strong><span>Encoder les catégories, traiter les valeurs manquantes et vérifier la qualité des données.</span></a>
+  <a class="link-card" href="fondamentaux/pretraitement.html"><span class="index">ÉCHELLES</span><strong>Normalisation et standardisation</strong><span>Comprendre l'effet des unités et des échelles sur les modèles.</span></a>
+  <a class="link-card" href="fondamentaux/distances.html"><span class="index">PROXIMITÉ</span><strong>Distances et similarités</strong><span>Comparer des observations à l'aide de mesures de proximité.</span></a>
+  <a class="link-card" href="fondamentaux/validation.html"><span class="index">GÉNÉRALISATION</span><strong>Entraînement, validation et test</strong><span>Préserver le jeu de test, stratifier et éviter les fuites de données.</span></a>
+  <a class="link-card" href="fondamentaux/evaluation.html"><span class="index">MÉTRIQUES</span><strong>Évaluer un modèle</strong><span>Interpréter les métriques de classification et de régression, dont R².</span></a>
+</div>
+
+<h2>6. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Quelle différence faites-vous entre une classification et une régression ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La classification prédit une catégorie, par exemple « achat » ou « pas d&#x27;achat ». La régression prédit une quantité, par exemple un montant en euros. Le choix dépend de la nature de la cible.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Pourquoi faut-il conserver des données qui n'ont pas servi à entraîner le modèle ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Pour mesurer sa capacité à généraliser à de nouvelles observations. Évaluer uniquement sur l&#x27;entraînement donnerait une vision trop optimiste, surtout si le modèle a mémorisé les exemples.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Dans quel cas rechercher des groupes plutôt que prédire une étiquette ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Lorsqu&#x27;on ne dispose pas de classes connues et que l&#x27;objectif est de découvrir des profils ressemblants, le clustering peut être adapté. Si l&#x27;on dispose d&#x27;étiquettes à prédire, la classification répond à une autre question.</p></div>
+</details>
+</div>
+</div>
+<p>Pour relier les notions étudiées, poursuivez avec l'exemple <a href="fondamentaux/demarche.html">Du problème à l'évaluation</a>.</p>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://scikit-learn.org/stable/supervised_learning.html" target="_blank" rel="noopener">scikit-learn, <i>Supervised learning</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/unsupervised_learning.html" target="_blank" rel="noopener">scikit-learn, <i>Unsupervised learning</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">scikit-learn, <i>Cross-validation</i></a>.</li>
+</ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

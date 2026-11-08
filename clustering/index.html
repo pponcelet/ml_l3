@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Introduction au clustering — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE NON SUPERVISÉ</div>
+<h1>Introduction au clustering</h1>
+<p class="lead">Le clustering cherche des groupes d’observations similaires sans disposer d’étiquettes de classes connues à l’avance.</p>
+
+<h2>1. Principe</h2><p>La notion de groupe dépend des hypothèses : proximité autour d’un centre, connexité, densité, ou organisation hiérarchique. Le même jeu de données peut conduire à des partitions différentes selon l’algorithme.</p>
+<h2>2. Centroïde et médoïde</h2>
+<div class="concept-grid"><div class="concept"><strong>Centroïde</strong><p>Moyenne des observations d’un groupe : il ne correspond pas nécessairement à une observation réelle.</p><p class="small">Pour {1, 2, 9}, centroïde = 4.</p></div><div class="concept"><strong>Médoïde</strong><p>Observation appartenant au groupe et minimisant la somme des distances aux autres observations.</p><p class="small">Pour {1, 2, 9}, médoïde = 2.</p></div></div>
+<h2>3. Trois approches</h2>
+<div class="hero-points"><a class="link-card" href="kmeans.html"><span class="index">PARTITIONNEMENT</span><strong>K-means</strong><span>K groupes compacts autour de centroïdes.</span></a><a class="link-card" href="hierarchique.html"><span class="index">HIÉRARCHIE</span><strong>Clustering hiérarchique</strong><span>Regroupements successifs et choix de liaison.</span></a><a class="link-card" href="dbscan.html"><span class="index">DENSITÉ</span><strong>DBSCAN</strong><span>Zones denses, formes complexes et bruit.</span></a><a class="link-card" href="comparaison.html"><span class="index">SYNTHÈSE</span><strong>Comparer les méthodes</strong><span>Les mêmes données analysées avec trois méthodes.</span></a></div>
+<h2>4. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Quelle distance utilise-t-on ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>La métrique choisie définit quelles observations sont considérées comme proches. Une distance euclidienne et une distance de Manhattan ne privilégient pas exactement les mêmes géométries ; les regroupements peuvent donc varier.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Comment les variables sont-elles mises à l’échelle ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Si une variable a une échelle bien plus grande, elle peut dominer les distances. Standardiser ou normaliser les variables peut rééquilibrer leur influence, à condition que ce choix ait un sens pour les données.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Quels paramètres faut-il choisir ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Cela dépend de la méthode : K-means demande un nombre de groupes K, le hiérarchique demande un critère de liaison et éventuellement une coupe, DBSCAN demande ε et MinPts. Il faut confronter ces choix aux données et à l&#x27;objectif.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Une partition est-elle stable et interprétable ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Une partition est stable si de petites modifications des données ou des paramètres ne la bouleversent pas. Son interprétation doit reposer sur les caractéristiques des observations, et non sur la seule séparation visuelle des couleurs.</p></div>
+</details>
+</div>
+</div>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/modules/clustering.html" target="_blank" rel="noopener">scikit-learn, <i>Clustering</i></a></li><li>Kaufman et Rousseeuw (1990), <a href="https://doi.org/10.1002/9780470316801" target="_blank" rel="noopener"><i>Finding Groups in Data</i></a>.</li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+
+</body>
+</html>

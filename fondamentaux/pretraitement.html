@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Normalisation et standardisation — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">FONDAMENTAUX</div>
+<h1>Normalisation et standardisation</h1>
+<p class="lead">Mettre les variables à des échelles comparables lorsque leurs unités ou leurs dispersions influencent les calculs.</p>
+
+<h2>1. Principe</h2>
+<p>Considérez des individus décrits par leur âge (en années) et leur salaire (en euros). Une différence de 2 000 € pèse numériquement beaucoup plus qu’une différence de 20 ans dans la distance euclidienne brute. Cette domination résulte des unités, pas nécessairement de la pertinence de la variable.</p>
+<div class="concept-grid"><div class="concept"><strong>Min-Max</strong><p>Chaque caractéristique est ramenée entre 0 et 1 : <span class="math">x′ = (x−min)/(max−min)</span>.</p></div><div class="concept"><strong>Standardisation Z-score</strong><p>On centre et réduit : <span class="math">z = (x−μ)/σ</span>. La moyenne devient 0 et l’écart-type 1 pour une variable non constante.</p></div></div>
+<h2>2. Expérimentation</h2>
+<p>Les observations restent à la <strong>même position à l’écran</strong>. Seul l’espace utilisé pour calculer les distances et former les groupes change. Cela permet d’identifier précisément l’effet du prétraitement.</p>
+<div class="lab"><div class="lab-head"><strong>Clustering des mêmes observations (K = 3)</strong><label>Prétraitement <select id="scale-method"><option value="raw">Données brutes</option><option value="minmax">Min-Max [0, 1]</option><option value="zscore">Standardisation Z-score</option></select></label></div><div id="scale-plot" class="chart"></div><div class="stats"><div><span>Observations</span><strong>96</strong></div><div><span>Groupes</span><strong>3</strong></div><div><span>Variables utilisées</span><strong id="scale-status">Âge / salaire bruts</strong></div></div><p class="lab-help">Les axes montrent les valeurs d’origine ; seules les distances utilisées par K-means changent.</p></div>
+<h2>3. Points de vigilance</h2>
+<ul><li>La standardisation n’est pas toujours préférable : chaque variable n’a pas nécessairement la même importance.</li><li>Min-Max et Z-score ne produisent pas toujours les mêmes groupes.</li><li>Les inerties calculées dans des espaces de caractéristiques différents ne sont <strong>pas directement comparables</strong>.</li>
+<li>En apprentissage supervisé, calculez les statistiques du prétraitement sur l’<strong>entraînement uniquement</strong>, puis réutilisez-les sans les réestimer sur la validation et le test.</li></ul>
+<h2>4. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Quelle différence faites-vous entre normalisation min-max et standardisation ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>La normalisation min-max ramène les valeurs à un intervalle choisi, souvent [0, 1]. La standardisation centre chaque variable et la divise par son écart-type : elle vise une moyenne nulle et un écart-type unitaire sur les données utilisées pour l&#x27;ajustement.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Pourquoi KNN est-il sensible aux échelles des variables ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>KNN classe les observations à partir de distances. Une variable dont les valeurs varient de 0 à 10 000 peut peser beaucoup plus qu&#x27;une autre qui varie de 0 à 1 ; les voisins choisis peuvent ainsi être dominés par la première.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi faut-il ajuster le changement d'échelle sur l'entraînement uniquement ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Utiliser la moyenne ou les extrêmes du test lors de l&#x27;ajustement fait entrer dans l&#x27;entraînement des informations normalement inconnues. Les paramètres sont calculés sur l&#x27;entraînement, puis appliqués sans les réestimer aux autres ensembles.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary><div class="detail-content">
+<h3>Exemple numérique</h3><p>Pour une variable prenant les valeurs <span class="math">(2, 4, 6)</span>, la moyenne vaut 4, le minimum 2 et le maximum 6. La normalisation Min-Max donne :</p>
+<div class="fond-formula">(2 − 2)/(6 − 2) = 0 ; (4 − 2)/4 = 0,5 ; (6 − 2)/4 = 1</div>
+<p>Pour une standardisation utilisant l’écart-type de population <span class="math">σ = √(8/3) ≈ 1,633</span>, on obtient :</p>
+<div class="fond-formula">z ≈ (−1,225 ; 0 ; +1,225)</div>
+<p>Si toutes les valeurs d’une variable sont identiques, la division par son étendue ou son écart-type n’est pas définie. Une procédure de prétraitement doit gérer ce cas explicitement.</p><h3>Influence sur les distances</h3><p>Standardiser puis utiliser la distance euclidienne revient à pondérer chaque écart au carré par l’inverse de la variance de sa variable : <span class="math">d²(zᵢ,zⱼ) = Σ (xᵢₗ−xⱼₗ)²/σₗ²</span>. Des variables quasi constantes peuvent alors être amplifiées.</p><p>En pratique, l’estimation des paramètres de mise à l’échelle doit être cohérente avec le protocole d’apprentissage et d’évaluation.</p></div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://scikit-learn.org/stable/modules/preprocessing.html" target="_blank" rel="noopener">scikit-learn, <i>Preprocessing data</i></a></li><li><a href="https://scikit-learn.org/stable/modules/clustering.html" target="_blank" rel="noopener">scikit-learn, <i>Clustering</i></a></li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/vendor/d3.v7.min.js"></script>
+<script>
+if (!window.d3) {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"><\/script>');
+}
+</script>
+<script src="../assets/js/common.js"></script>
+<script src="../assets/js/pretraitement.js"></script>
+
+</body>
+</html>

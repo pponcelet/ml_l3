@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Motifs séquentiels — Recherche par niveaux — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../" class="pm-page seq-page" data-pattern-script="sequences.js">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1"><article class="course-page">
+<div class="eyebrow">EXPLORATION NON SUPERVISÉE · FOUILLE DE MOTIFS</div>
+<h1>Motifs séquentiels — Recherche de motifs fréquents</h1>
+<p class="lead">Identifier les sous-séquences fréquentes dans une base d’historiques en tenant compte de l’ordre des événements.</p>
+
+<h2>1. Principe</h2>
+<p>Un <strong>itemset</strong> indique quels items sont présents ensemble : {A, C} est identique à {C, A}. Une <strong>séquence</strong> indique au contraire l'ordre des événements : ⟨A → C⟩ est différente de ⟨C → A⟩.</p>
+<div class="concept-grid">
+  <div class="concept"><strong>Motif séquentiel</strong><p>Une suite ordonnée, par exemple ⟨A → C⟩. Des événements intermédiaires sont autorisés : ⟨A, B, C⟩ contient ⟨A → C⟩.</p></div>
+  <div class="concept"><strong>Support séquentiel</strong><p>Proportion d'historiques contenant le motif dans le bon ordre. Chaque historique compte au plus une fois.</p></div>
+</div>
+<p class="note">Chaque historique contient une succession d’événements A, B, C ou D. L’ordre est pris en compte, mais pas la durée entre les événements.</p>
+
+<h2>2. Algorithme général — GSP</h2>
+<p>La recherche suit le principe de <strong>GSP</strong> : générer des séquences candidates, compter combien d'historiques les contiennent, puis conserver uniquement celles dont le support atteint le seuil fixé.</p>
+<div class="concept-grid"><div class="concept"><strong>C<sub>k</sub> — candidats</strong><p>Séquences de longueur k susceptibles d'être fréquentes.</p></div><div class="concept"><strong>L<sub>k</sub> — motifs fréquents</strong><p>Candidats de longueur k respectant le support minimal.</p></div></div>
+<div class="algorithm"><ol>
+  <li>Comptez les événements individuels et obtenez L<sub>1</sub>.</li>
+  <li>À partir de L<sub>k−1</sub>, générez les candidats C<sub>k</sub> en respectant l'ordre.</li>
+  <li>Éliminez les candidats contenant une sous-séquence de longueur k−1 non fréquente.</li>
+  <li>Comptez les historiques contenant chaque candidat et conservez L<sub>k</sub>.</li>
+  <li>Recommencez tant que des candidats peuvent être générés.</li>
+</ol>
+<pre>L1 = événements fréquents
+Pour k = 2, 3, ... :
+    Ck = prolonger les motifs de L(k-1)
+    retirer les candidats avec une sous-séquence non fréquente
+    compter le nombre d'historiques contenant chaque candidat
+    Lk = {p dans Ck : support(p) ≥ minsup}
+Retourner tous les motifs fréquents</pre></div>
+<p class="note"><strong>Pourquoi élaguer ?</strong> Si ⟨A → C⟩ n'est pas fréquent, aucune séquence plus longue contenant ⟨A → C⟩ ne peut être fréquente. Cette propriété est appelée <strong>antimonotonie du support</strong>.</p>
+
+<h2>3. Expérimentation</h2>
+<h3 class="seq-section-subtitle">Explorer une base de séquences</h3>
+<p>Modifiez les historiques et recherchez un motif dans les mêmes données. Les deux panneaux sont synchronisés : chaque modification actualise le support du motif sélectionné.</p>
+<div class="seq-workbench" aria-label="Exploration interactive des séquences">
+<div class="lab pm-lab" id="seq-data-lab">
+  <div class="lab-head"><strong>Base de séquences modifiable</strong><span class="small" id="seq-data-summary">8 historiques · événements A, B, C, D</span></div>
+  <p class="seq-card-intro">Cliquez sur une case pour changer un événement (A, B, C, D), ou pour le supprimer. Le symbole + ajoute un événement.</p>
+  <div id="seq-table" class="pm-table-scroll"></div>
+  <div class="actions">
+    <button type="button" id="seq-new-row" class="btn secondary">Ajouter un historique</button>
+    <button type="button" id="seq-original" class="btn ghost">Rétablir les données d'origine</button>
+  </div>
+  <p id="seq-edit-status" class="lab-help" aria-live="polite">Sélectionnez un événement dans le tableau pour le modifier.</p>
+  
+</div>
+<div class="lab pm-lab" id="seq-pattern-lab">
+  <div class="lab-head"><strong>Explorer une sous-séquence</strong><span class="small">Ordre obligatoire · contiguïté facultative</span></div>
+  <p class="seq-card-intro">Choisissez une sous-séquence. Les occurrences correspondantes sont surlignées dans le tableau voisin.</p>
+  <div class="pm-controls">
+    <label for="seq-example">Motif proposé
+      <select id="seq-example"><option value="AC" selected>A puis C</option><option value="CA">C puis A</option><option value="AB">A puis B</option><option value="BC">B puis C</option><option value="ABD">A puis B puis D</option><option value="custom">Motif personnel</option></select>
+    </label>
+    <div class="pm-builder" id="seq-add" aria-label="Ajouter un événement au motif">
+      <span class="small">Ajouter :</span><button type="button" class="btn secondary" data-event="A">A</button><button type="button" class="btn secondary" data-event="B">B</button><button type="button" class="btn secondary" data-event="C">C</button><button type="button" class="btn secondary" data-event="D">D</button>
+    </div>
+    <div class="pm-builder"><button type="button" class="btn ghost" id="seq-undo">Effacer le dernier</button><button type="button" class="btn ghost" id="seq-pattern-reset">Motif initial</button></div>
+  </div>
+  <p id="seq-pattern" class="pm-highlight-rule">A → C</p>
+  <div class="stats pm-stats" aria-live="polite"><div><span>Historiques contenant le motif</span><strong id="seq-support">—</strong></div><div><span>Support</span><strong id="seq-rate">—</strong></div></div>
+  <p id="seq-pattern-caption" class="lab-help" aria-live="polite">—</p>
+</div>
+</div>
+
+<h3 class="seq-section-subtitle">Rechercher les motifs fréquents</h3>
+<p>Modifiez le support minimal, puis lancez la recherche. Les étapes C<sub>1</sub>, L<sub>1</sub>, C<sub>2</sub>, L<sub>2</sub>… sont animées dans l'ordre. Les motifs recherchés comportent au plus <strong>3 événements</strong>.</p>
+<div class="lab pm-lab" id="seq-algorithm-lab">
+  <div class="lab-head"><strong>Suivre la recherche des motifs fréquents</strong><span class="small">Calcul sur les historiques ci-dessus</span></div>
+  <div class="pm-controls">
+    <label for="seq-minsup">Support minimal <output id="seq-minsup-value">3 sur 8</output><input type="range" id="seq-minsup" min="1" max="8" step="1" value="3"></label>
+    <label for="seq-speed">Vitesse<select id="seq-speed"><option value="1600">Lente</option><option value="900" selected>Normale</option><option value="450">Rapide</option></select></label>
+  </div>
+  <div class="actions"><button type="button" class="btn primary" id="seq-play">Lancer</button><button type="button" class="btn secondary" id="seq-next">Étape suivante</button><button type="button" class="btn ghost" id="seq-restart">Recommencer</button><button type="button" class="btn ghost" id="seq-result">Voir le résultat</button></div>
+  <div class="pm-progress"><label for="seq-step">Étape</label><input type="range" id="seq-step" min="0" max="1" step="1" value="0"><output id="seq-step-value">—</output></div>
+  <div class="pm-stage-heading"><span id="seq-stage" class="pm-stage-badge">C₁</span><div><h3 id="seq-stage-title">Candidats</h3><p id="seq-stage-desc">—</p></div></div>
+  <div id="seq-bars" class="pm-bars-scroll pm-bars-selectable"></div>
+  <div class="stats pm-stats" aria-live="polite"><div><span>Motifs à cette étape</span><strong id="seq-stage-count">—</strong></div><div><span>Motifs fréquents trouvés</span><strong id="seq-frequent-count">—</strong></div></div>
+  <p class="lab-help">Sélectionnez une barre pour chercher ce motif dans le tableau des historiques, au-dessus.</p>
+  <p id="pm-error" class="pm-error" role="status"></p>
+  <p class="figure-source">Motifs d’au plus trois événements ; sous-séquences non nécessairement contiguës, sans contrainte temporelle.</p>
+</div>
+
+<h2>4. Motifs fréquents obtenus</h2>
+<p>Le tableau suivant rassemble les motifs qui atteignent le support minimal. Cliquez sur un motif pour voir les historiques qui le contiennent.</p>
+<div class="lab pm-lab" id="seq-results-lab">
+  <p class="small" id="seq-result-info">—</p>
+  <div class="pm-table-scroll pm-seq-results-scroll"><table class="pm-seq-results-table"><thead><tr><th>Motif</th><th>Longueur</th><th>Support (historiques)</th><th>Support (%)</th></tr></thead><tbody id="seq-results-body"></tbody></table></div>
+  <p class="lab-help" id="seq-selected-summary" aria-live="polite">—</p>
+  <ol id="seq-matches" class="pm-matches-list pm-seq-matches"></ol>
+</div>
+
+<h2>5. Avantages et limites</h2>
+<div class="proscons"><div><h3>Avantages</h3><ul><li>Recherche les régularités tenant compte de l'ordre.</li><li>Résultats interprétables à partir des historiques.</li><li>Élagage justifié par l'antimonotonie du support.</li></ul></div><div><h3>Limites</h3><ul><li>Nombre de candidats rapidement important.</li><li>Choix du support minimal parfois délicat.</li><li>Les durées et les événements simultanés exigent un modèle plus général.</li></ul></div></div>
+<h2>6. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Inversez deux événements dans un historique. Le support de ⟨A → C⟩ change-t-il ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Cela dépend des autres occurrences du motif dans cet historique. Le support de ⟨A → C⟩ compte les historiques où un A précède un C ; inverser ces événements peut supprimer ou créer cette relation, et donc changer le support d&#x27;une unité.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Augmentez le support minimal. Qu'observez-vous sur le nombre de motifs fréquents ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Le nombre de motifs fréquents ne peut pas augmenter lorsque le seuil minimal augmente. Certains motifs n&#x27;atteignent plus le seuil et tous leurs prolongements peuvent être élagués par la propriété d&#x27;antimonotonie.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi ⟨A → B⟩ et ⟨B → A⟩ peuvent-ils avoir des supports différents ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>L&#x27;ordre fait partie de la définition d&#x27;un motif séquentiel. Un historique contenant A puis B n&#x27;implique pas qu&#x27;il contienne aussi B puis A ; le nombre d&#x27;historiques qui vérifient chaque ordre peut donc différer.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Un motif fréquent signifie-t-il qu'il existe un lien causal entre les événements ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Non. Un motif fréquent indique seulement une succession souvent observée. Il ne démontre pas que le premier événement provoque le second ; des facteurs communs ou le contexte peuvent expliquer cette succession.</p></div>
+</details>
+</div>
+</div>
+<details class="further" id="seq-maths"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content as-formal">
+<p>Considérons les <strong>8 historiques initiaux</strong> du tableau pour effectuer les calculs de support.</p>
+
+<h3>1. Représenter une base de séquences</h3>
+<p>Soit <span class="math">E = {A, B, C, D}</span> l'ensemble des événements possibles.
+Une séquence est une liste <strong>ordonnée</strong> d'événements. On note
+<span class="math">D = (s<sub>1</sub>, …, s<sub>N</sub>)</span> une base contenant
+<span class="math">N</span> séquences.</p>
+<div class="as-formula">s<sub>1</sub> = ⟨A → B → C → D⟩ &nbsp; ; &nbsp;
+s<sub>2</sub> = ⟨A → C → B → D⟩ &nbsp; ; &nbsp; N = 8</div>
+<p>Voici les huit historiques utilisés dans notre exemple :</p>
+<div class="comparison-table"><table class="as-example-table">
+<thead><tr><th>Historique</th><th>Séquence</th><th>Contient ⟨A → C⟩ ?</th></tr></thead>
+<tbody>
+<tr><td>s<sub>1</sub></td><td>⟨A → B → C → D⟩</td><td>Oui</td></tr>
+<tr><td>s<sub>2</sub></td><td>⟨A → C → B → D⟩</td><td>Oui</td></tr>
+<tr><td>s<sub>3</sub></td><td>⟨B → A → C → D⟩</td><td>Oui</td></tr>
+<tr><td>s<sub>4</sub></td><td>⟨A → B → D⟩</td><td>Non</td></tr>
+<tr><td>s<sub>5</sub></td><td>⟨A → C → D⟩</td><td>Oui</td></tr>
+<tr><td>s<sub>6</sub></td><td>⟨B → C → A → D⟩</td><td>Non</td></tr>
+<tr><td>s<sub>7</sub></td><td>⟨A → B → C⟩</td><td>Oui</td></tr>
+<tr><td>s<sub>8</sub></td><td>⟨C → A → B → D⟩</td><td>Non</td></tr>
+</tbody></table></div>
+
+<h3>2. Définir une sous-séquence</h3>
+<p>Soit un motif <span class="math">p = ⟨p<sub>1</sub>, …, p<sub>k</sub>⟩</span>
+et un historique <span class="math">s = ⟨e<sub>1</sub>, …, e<sub>m</sub>⟩</span>.
+On dit que <span class="math">p</span> est une <strong>sous-séquence</strong> de
+<span class="math">s</span>, notée <span class="math">p ⊑ s</span>, s'il existe
+des positions <span class="math">i<sub>1</sub> &lt; … &lt; i<sub>k</sub></span>
+telles que <span class="math">p<sub>j</sub> = e<sub>i<sub>j</sub></sub></span>
+pour chaque <span class="math">j</span>.</p>
+<div class="as-formula">⟨A → C⟩ ⊑ ⟨A → B → C → D⟩, &nbsp; car A est en position 1
+et C en position 3.</div>
+<p>Les événements doivent respecter <strong>l'ordre</strong>, mais ils ne sont
+pas nécessairement consécutifs. En revanche, ⟨C → A⟩ n'est <strong>pas</strong>
+une sous-séquence de ⟨A → B → C → D⟩ : C apparaît après A.</p>
+
+<h3>3. Calculer le support d'un motif</h3>
+<p>Le <strong>support absolu</strong> compte le nombre d'historiques qui contiennent
+le motif. Chaque historique est compté <strong>une seule fois</strong>, même si
+le motif y apparaît plusieurs fois :</p>
+<div class="as-formula">N(p) = |{i ∈ {1, …, N} : p ⊑ s<sub>i</sub>}|</div>
+<p>Le <strong>support relatif</strong> est la proportion d'historiques concernés :</p>
+<div class="as-formula">supp(p) = N(p) / N</div>
+<p>Dans la base de huit historiques :</p>
+<div class="comparison-table"><table class="as-example-table">
+<thead><tr><th>Motif</th><th>Historiques concernés</th><th>Support absolu</th><th>Support relatif</th></tr></thead>
+<tbody>
+<tr><td>⟨A → C⟩</td><td>1, 2, 3, 5, 7</td><td>5</td><td>5 / 8 = 62,5 %</td></tr>
+<tr><td>⟨C → A⟩</td><td>6, 8</td><td>2</td><td>2 / 8 = 25 %</td></tr>
+<tr><td>⟨A → B → D⟩</td><td>1, 2, 4, 8</td><td>4</td><td>4 / 8 = 50 %</td></tr>
+</tbody></table></div>
+<p>Le support dépend donc de <strong>l'ordre des événements</strong> :
+⟨A → C⟩ apparaît dans cinq historiques, contre seulement deux
+pour ⟨C → A⟩.</p>
+
+<h3>4. Comprendre l'élagage utilisé par GSP</h3>
+<p>Si un motif <span class="math">p</span> est une sous-séquence d'un motif
+plus long <span class="math">q</span>, tout historique contenant
+<span class="math">q</span> contient aussi <span class="math">p</span>.
+Ainsi :</p>
+<div class="as-formula">p ⊑ q &nbsp; ⇒ &nbsp; N(q) ≤ N(p)
+&nbsp; (donc supp(q) ≤ supp(p))</div>
+<p>Par exemple, le motif ⟨B → A⟩ est présent dans <strong>2 historiques</strong>
+(s<sub>3</sub> et s<sub>6</sub>), tandis que ⟨B → A → C⟩ n'apparaît que dans
+<strong>1 historique</strong> (s<sub>3</sub>) :</p>
+<div class="as-formula">N(⟨B → A → C⟩) = 1 ≤ 2 = N(⟨B → A⟩)</div>
+<p>Avec un support minimal de <strong>3 historiques sur 8</strong>, ⟨B → A⟩
+n'est pas fréquent. Par conséquent, aucun motif plus long qui contient
+⟨B → A⟩ ne peut être fréquent. <strong>GSP peut éliminer ces candidats
+sans compter leur support</strong> : c'est la propriété d'<strong>antimonotonie</strong>.</p>
+
+<h3>5. Rechercher les motifs fréquents par niveaux</h3>
+<p>On note <span class="math">C<sub>k</sub></span> l'ensemble des motifs
+candidats de longueur <span class="math">k</span> et
+<span class="math">L<sub>k</sub></span> ceux dont le support absolu atteint
+le seuil <span class="math">minsup</span> :</p>
+<div class="as-formula">L<sub>k</sub> = {p ∈ C<sub>k</sub> : N(p) ≥ minsup}</div>
+<p>Dans notre exemple, avec <span class="math">minsup = 3</span> :</p>
+<div class="comparison-table"><table class="as-example-table">
+<thead><tr><th>Niveau</th><th>Motifs fréquents obtenus</th></tr></thead>
+<tbody>
+<tr><td>L<sub>1</sub></td><td>⟨A⟩ (8), ⟨B⟩ (7), ⟨C⟩ (7), ⟨D⟩ (7)</td></tr>
+<tr><td>L<sub>2</sub></td><td>⟨A → D⟩ (7), ⟨B → D⟩ (6), ⟨C → D⟩ (6),
+⟨A → B⟩ (5), ⟨A → C⟩ (5), ⟨B → C⟩ (4)</td></tr>
+<tr><td>L<sub>3</sub></td><td>⟨A → B → D⟩ (4), ⟨A → C → D⟩ (4),
+⟨B → C → D⟩ (3)</td></tr>
+</tbody></table></div>
+<p>Les nombres entre parenthèses indiquent le <strong>support absolu</strong>.
+À chaque niveau, GSP génère des candidats à partir des motifs fréquents
+précédents, élimine ceux qui ne peuvent pas être fréquents, puis compte les
+historiques correspondants.</p>
+<p class="note">Les motifs étudiés comportent au plus trois événements. Dans d’autres applications, une position peut contenir plusieurs items et des contraintes temporelles peuvent être imposées. Un motif fréquent révèle une régularité, mais n’établit pas de relation de causalité.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+  <li>Agrawal, R. et Srikant, R. (1995). <a href="https://doi.org/10.1109/ICDE.1995.380415" target="_blank" rel="noopener"><i>Mining Sequential Patterns</i></a>, ICDE.</li>
+  <li>Srikant, R. et Agrawal, R. (1996). <i>Mining Sequential Patterns: Generalizations and Performance Improvements</i>, EDBT.</li>
+  <li>Pei, J. et al. (2001). <a href="https://www2.cs.sfu.ca/~jpei/publications/span.pdf" target="_blank" rel="noopener"><i>PrefixSpan: Mining Sequential Patterns Efficiently by Prefix-Projected Pattern Growth</i></a>, ICDE.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer></main>
+<script src="../assets/js/site.js"></script><script src="../assets/js/patterns-loader.js"></script>
+</body></html>

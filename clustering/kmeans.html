@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>K-means — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">CLUSTERING · PARTITIONNEMENT</div>
+<h1>K-means</h1>
+<p class="lead">Répartir les observations en K groupes en minimisant leur dispersion autour des centroïdes.</p>
+
+<h2>1. Principe</h2><p>Chaque groupe est résumé par un <strong>centroïde</strong>, c’est-à-dire la moyenne de ses observations. K-means alterne affectation au centre le plus proche et déplacement des centres vers les moyennes. La distance utilisée est euclidienne, et l’objectif repose sur ses carrés.</p>
+<h2>2. Algorithme général</h2><p>K-means utilise ici l’algorithme de Lloyd, qui alterne l’affectation des observations et le recalcul des centroïdes.</p>
+<div class="algorithm"><ol><li>Choisissez un nombre de groupes K.</li><li>Initialisez K centroïdes.</li><li>Affectez chaque observation à son centroïde le plus proche.</li><li>Recalculez chaque centroïde comme moyenne de son groupe.</li><li>Répétez les étapes 3 et 4 jusqu’à stabilisation.</li></ol><pre>Entrées : données X, entier K
+Initialiser K centroïdes
+Répéter :
+    affecter chaque x au centroïde le plus proche
+    remplacer chaque centre par la moyenne du groupe
+Jusqu’à stabilisation (ou limite d’itérations)</pre></div>
+<h2>3. Expérimentation</h2><p>Choisissez K. Vous pouvez initialiser les centroïdes aléatoirement, ou cliquer dans le graphique pour les placer, puis les déplacer avant de lancer l’exécution automatique. Comparez plusieurs initialisations sur les mêmes données.</p>
+<div class="lab"><div class="lab-head"><strong>Partitionnement des observations</strong><label>K = <output id="km-k-value">3</output><input id="km-k" type="range" min="2" max="6" value="3"></label></div>
+<div class="parameter-row"><label>Méthode / distance <select id="km-method"><option value="l2">K-means · euclidienne au carré</option><option value="l1">K-medians · Manhattan (L1)</option></select></label></div>
+<div class="actions"><button id="km-random" class="btn secondary">Centres aléatoires</button><button id="km-manual" class="btn secondary">Placer les centres</button><button id="km-play" class="btn primary">Lancer</button><button id="km-reset" class="btn ghost">Recommencer</button></div>
+<div id="km-plot" class="chart"></div><div class="stats"><div><span>Étape</span><strong id="km-phase">Initialisation</strong></div><div><span>Itération</span><strong id="km-iter">0</strong></div><div><span id="km-cost-label">Inertie (L2²)</span><strong id="km-inertia">—</strong></div></div>
+<p class="lab-help" id="km-message" aria-live="polite">Initialisez les centres pour commencer.</p><p class="small" id="km-cost-desc"><strong>Inertie :</strong> somme des distances euclidiennes <em>au carré</em> entre les observations et leur centroïde. Elle s’exprime en unités², pas en pourcentage. À K fixé, K-means cherche à la diminuer.</p></div>
+<h2>4. Comment choisir K ?</h2><p>Le choix de K par l’inertie et la silhouette concerne ici le <strong>K-means classique (L2²)</strong>.</p><p>Pour chaque valeur de K, nous exécutons plusieurs initialisations et retenons celle de plus faible inertie. La <strong>méthode du coude</strong> recherche un ralentissement des gains lorsque K augmente. La <strong>silhouette moyenne</strong> combine cohésion et séparation : une valeur proche de 1 indique des groupes plutôt bien séparés, une valeur proche de 0 des points aux frontières, et une valeur négative des observations potentiellement mal affectées.</p>
+<div class="lab"><div class="lab-head"><strong>Choix de K : coude et silhouette</strong><button id="choice-recompute" class="btn secondary">Recalculer</button></div><div class="double-chart"><div><h3>Inertie selon K</h3><div id="elbow-plot"></div></div><div><h3>Silhouette moyenne selon K</h3><div id="silhouette-plot"></div></div></div><p class="lab-help" id="choice-explain">Sélectionnez une valeur de K sur l’une des courbes pour afficher sa partition.</p><div id="choice-partition" class="chart chart-medium"></div><p class="small">Le coude est une heuristique : il peut être ambigu. La silhouette est calculée ici avec la distance euclidienne et n’est pas définie pour K = 1. Les deux critères peuvent suggérer des K différents.</p></div>
+<h2>5. Influence de la normalisation</h2>
+<p>Sur un <strong>second jeu de données</strong> décrit par l’âge et le salaire, comparez les partitions obtenues avant et après mise à l’échelle. Les observations restent à la même position dans le graphique : seules les distances calculées par K-means changent.</p>
+<div class="lab"><div class="lab-head"><strong>Les mêmes observations, trois prétraitements</strong><label>Transformation <select id="scale-method"><option value="raw">Données brutes</option><option value="minmax">Min-Max [0,1]</option><option value="zscore">Standardisation Z-score</option></select></label></div><div id="scale-plot" class="chart"></div><div class="stats"><div><span>Observations</span><strong>96</strong></div><div><span>Groupes</span><strong>3</strong></div><div><span>Données utilisées pour calculer les distances</span><strong id="scale-status">Âge / salaire bruts</strong></div></div><p class="lab-help">La valeur de l’inertie n’est pas directement comparable entre des espaces de variables de différentes échelles. <a href="../fondamentaux/pretraitement.html">Voir la leçon complète sur le prétraitement.</a></p></div>
+<h2>6. Avantages et limites</h2><div class="proscons"><div><h3>Avantages</h3><ul><li>Simple à comprendre et relativement rapide.</li><li>Adapté aux groupes compacts et approximativement sphériques.</li><li>Fonction objectif explicite.</li></ul></div><div><h3>Limites</h3><ul><li>Choix de K nécessaire.</li><li>Sensibilité à l’initialisation, aux unités et aux valeurs extrêmes.</li><li>Peu adapté aux formes non convexes et aux densités très différentes.</li></ul></div></div>
+<p class="note"><strong>Changer de distance change parfois d’algorithme.</strong> Essayez le sélecteur au-dessus du graphique : K-means utilise les centroïdes et la somme des distances euclidiennes au carré ; K-medians utilise les médianes et la somme des distances de Manhattan. K-medoids, encore différent, choisit des représentants appartenant aux observations. Pour comprendre les métriques, consultez <a href="../fondamentaux/distances.html">Distances et similarités</a>. Pour observer l’effet des unités, consultez <a href="../fondamentaux/pretraitement.html">Normalisation et standardisation</a>.</p>
+<h2>7. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi les centres initiaux peuvent-ils changer le résultat de K-means ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Les premières affectations dépendent des centres choisis. K-means améliore ensuite localement l&#x27;inertie, mais peut converger vers différents minima locaux ; plusieurs initialisations aident à retenir une meilleure solution.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Que se passe-t-il généralement lorsque vous augmentez K ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>L&#x27;inertie minimale théoriquement atteignable ne peut pas augmenter lorsque K augmente. En pratique, l&#x27;inertie calculée peut fluctuer selon l&#x27;initialisation. Un groupe supplémentaire n&#x27;est pas nécessairement pertinent : la silhouette et l&#x27;interprétation restent utiles.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi la standardisation peut-elle modifier la partition ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>K-means utilise des distances euclidiennes au carré. Si une variable domine numériquement les autres, elle influence davantage les affectations ; la standardisation modifie ce poids relatif et peut changer les groupes obtenus.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content">
+<h3>Exemple : centroïdes et inertie</h3>
+<p>Considérons six observations situées sur un même axe, de coordonnée verticale nulle :</p>
+<div class="comparison-table"><table>
+  <thead><tr><th>Observation</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+  <tbody><tr><th>Coordonnées (x, y)</th><td>(0, 0)</td><td>(1, 0)</td><td>(2, 0)</td><td>(8, 0)</td><td>(9, 0)</td><td>(10, 0)</td></tr></tbody>
+</table></div>
+
+<p>Choisissons <span class="math">K = 2</span>, avec les groupes <span class="math">C₁ = {A, B, C}</span> et <span class="math">C₂ = {D, E, F}</span>.</p>
+<h3>1. Calculer les centroïdes</h3>
+<p>Le centroïde d’un groupe est la moyenne des coordonnées de ses observations :</p>
+<p class="math" style="text-align:center;font-size:17px">μⱼ = (1 / |Cⱼ|) ∑<sub>x∈Cⱼ</sub> x</p>
+<p>En remplaçant les observations par leurs valeurs :</p>
+<p class="math" style="text-align:center;font-size:17px">μ₁ = ((0 + 1 + 2) / 3, 0) = (1, 0)</p>
+<p class="math" style="text-align:center;font-size:17px">μ₂ = ((8 + 9 + 10) / 3, 0) = (9, 0)</p>
+<h3>2. Calculer la fonction objectif (inertie)</h3>
+<p>Pour une partition en <span class="math">K</span> groupes, K-means minimise la somme des distances euclidiennes <strong>au carré</strong> entre chaque observation et le centroïde de son groupe :</p>
+<p class="math" style="text-align:center;font-size:17px">J = ∑<sub>j=1</sub><sup>K</sup> ∑<sub>x∈Cⱼ</sub> ‖x − μⱼ‖²</p>
+<p>Avec les centroïdes calculés ci-dessus :</p>
+<p class="math" style="text-align:center;font-size:17px">J = [(0−1)² + (1−1)² + (2−1)²] + [(8−9)² + (9−9)² + (10−9)²]</p>
+<p class="math" style="text-align:center;font-size:17px"><strong>J = (1 + 0 + 1) + (1 + 0 + 1) = 4</strong></p>
+<p>Le nombre 4 mesure ici une dispersion <strong>en unités au carré</strong> : ce n’est pas un pourcentage. Les coordonnées verticales étant nulles, elles ne contribuent pas au calcul.</p>
+<h3>3. Comprendre une itération de Lloyd</h3>
+<p>Supposons que les centroïdes soient initialement placés en <span class="math">(0, 0)</span> et <span class="math">(8, 0)</span>. L’étape d’affectation donne les mêmes deux groupes, mais l’inertie vaut alors :</p>
+<p class="math" style="text-align:center;font-size:17px">J<sub>avant</sub> = (0² + 1² + 2²) + (0² + 1² + 2²) = 10</p>
+<p>Après recalcul des centroïdes en <span class="math">(1, 0)</span> et <span class="math">(9, 0)</span>, elle descend à <span class="math">J<sub>après</sub> = 4</span>.</p>
+<p>L’étape d’affectation puis celle de mise à jour <strong>ne font pas augmenter l’inertie</strong>. L’algorithme converge vers une solution stable, qui n’est pas nécessairement le minimum global. Plusieurs initialisations, notamment avec K-means++, peuvent améliorer le résultat.</p>
+<h3>4. Évaluer les groupes avec la silhouette</h3>
+<p>Pour une observation <span class="math">i</span>, notons <span class="math">a(i)</span> sa distance moyenne aux autres observations de son groupe et <span class="math">b(i)</span> la plus petite distance moyenne à un autre groupe :</p>
+<p class="math" style="text-align:center;font-size:17px">s(i) = [b(i) − a(i)] / max(a(i), b(i))</p>
+<p>Pour B (coordonnée 1), <span class="math">a(B) = (1 + 1) / 2 = 1</span> et <span class="math">b(B) = (7 + 8 + 9) / 3 = 8</span>, donc :</p>
+<p class="math" style="text-align:center;font-size:17px"><strong>s(B) = (8 − 1) / 8 = 0,875</strong></p>
+<p>Une valeur proche de 1 indique que B est nettement plus proche de son groupe que de l’autre. La silhouette moyenne permet de comparer plusieurs valeurs de K, mais n’indique pas à elle seule si les groupes sont pertinents pour une application.</p>
+<p><strong>K-means et K-medians :</strong> K-medians minimise les distances L1 aux médianes ; ce n’est pas un simple changement de distance dans le K-means classique.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol><li><a href="https://doi.org/10.1109/TIT.1982.1056489" target="_blank" rel="noopener">Lloyd (1982), <i>Least Squares Quantization in PCM</i></a></li><li><a href="https://doi.org/10.1016/0377-0427(87)90125-7" target="_blank" rel="noopener">Rousseeuw (1987), <i>Silhouettes</i></a></li><li><a href="https://scikit-learn.org/stable/modules/clustering.html" target="_blank" rel="noopener">scikit-learn, <i>Clustering</i></a></li><li><a href="https://doi.org/10.1145/3606274.3606278" target="_blank" rel="noopener">Schubert (2023), <i>Stop using the elbow criterion for k-means...</i></a></li></ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/kmeans-loader.js"></script>
+
+</body>
+</html>

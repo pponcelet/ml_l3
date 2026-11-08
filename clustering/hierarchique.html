@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Clustering hiérarchique — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body data-root="../" class="hc-page">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">CLUSTERING · HIÉRARCHIE</div>
+<h1>Clustering hiérarchique</h1>
+<p class="lead">Construire progressivement une hiérarchie de groupes et comprendre comment lire un dendrogramme.</p>
+
+<h2>1. Principe</h2>
+<p>Le <strong>clustering hiérarchique agglomératif</strong> part d'un groupe par observation. À chaque étape, il fusionne les deux groupes considérés comme les plus proches. Les fusions sont <strong>irréversibles</strong> : une observation ne change pas ensuite de groupe indépendamment des autres.</p>
+<p>Contrairement à K-means, il n'est pas nécessaire de choisir K pour <em>construire</em> la hiérarchie. On peut ensuite choisir un nombre de groupes en <strong>coupant le dendrogramme</strong> à un certain niveau.</p>
+
+<h2>2. Algorithme général</h2>
+<div class="algorithm"><ol>
+<li>Placez chaque observation dans son propre groupe.</li>
+<li>Calculez la dissimilarité entre chaque paire de groupes selon un <strong>critère de liaison</strong>.</li>
+<li>Fusionnez les deux groupes de dissimilarité minimale.</li>
+<li>Actualisez les dissimilarités entre groupes et répétez jusqu'à obtenir un seul groupe.</li>
+<li>Coupez éventuellement l'arbre pour obtenir une partition en K groupes.</li>
+</ol><pre>Entrée : observations X, critère de liaison
+Créer n groupes contenant chacun une observation
+Tant qu'il reste plus d'un groupe :
+    choisir la paire de groupes la plus proche
+    fusionner ces deux groupes
+    mettre à jour leurs dissimilarités
+Construire le dendrogramme des fusions
+Choisir éventuellement une coupe donnant K groupes</pre></div>
+
+<h2>3. Critères de liaison</h2>
+<p>La notion de « distance entre deux groupes » n'est pas unique. Changer le critère de liaison peut modifier toute la hiérarchie.</p>
+<div class="concept-grid">
+<div class="concept"><strong>Single (liaison simple)</strong><p>La plus petite distance entre deux observations appartenant à des groupes différents. Peut produire un effet de chaîne.</p></div>
+<div class="concept"><strong>Complete (liaison complète)</strong><p>La plus grande distance entre deux observations appartenant à des groupes différents. Favorise souvent les regroupements compacts.</p></div>
+<div class="concept"><strong>Average (liaison moyenne)</strong><p>La moyenne des distances entre toutes les paires d'observations des deux groupes.</p></div>
+<div class="concept"><strong>Ward</strong><p>Choisit la fusion provoquant la plus faible augmentation de l'inertie intra-groupes. Ce n'est pas une simple distance entre points.</p></div>
+</div>
+
+<h2>4. Expérimentation</h2>
+<p>Observez les fusions dans le nuage de points, puis leur traduction dans le <strong>dendrogramme à droite</strong>. Changez le jeu de données et le critère de liaison, puis construisez la hiérarchie jusqu’au bout. Choisissez ensuite le nombre de groupes K : la coupe du dendrogramme et les couleurs du nuage de points se mettront à jour ensemble.</p>
+<div class="lab" id="hc-lab">
+  <div class="lab-head"><strong>Construction agglomérative d'une hiérarchie</strong><span class="small">24 observations</span></div>
+  <div class="hc-controls">
+    <label>Jeu de données
+      <select id="hc-dataset">
+        <option value="blobs">Groupes compacts</option>
+        <option value="elongated">Groupes allongés</option>
+        <option value="moons">Deux lunes</option>
+      </select>
+    </label>
+    <label>Critère de liaison
+      <select id="hc-linkage">
+        <option value="single">Single (minimum)</option>
+        <option value="complete">Complete (maximum)</option>
+        <option value="average">Average (moyenne)</option>
+        <option value="ward" selected>Ward (inertie)</option>
+      </select>
+    </label>
+    <label>Coupe du dendrogramme : K = <output id="hc-target-value">3</output>
+      <input type="range" id="hc-target" min="1" max="10" value="3">
+    </label>
+    <label for="hc-height-scale">Échelle du dendrogramme
+      <select id="hc-height-scale">
+        <option value="order" selected>Ordre des fusions</option>
+        <option value="sqrt">Racine carrée</option>
+        <option value="linear">Linéaire (coûts réels)</option>
+      </select>
+    </label>
+  </div>
+  <div class="actions">
+    <button id="hc-play" type="button" class="btn primary">Lancer</button>
+    <button id="hc-step" type="button" class="btn secondary">Fusion suivante</button>
+    <button id="hc-reset" type="button" class="btn ghost">Recommencer</button>
+    <label class="hc-speed-label">Vitesse
+      <select id="hc-speed">
+        <option value="1100">Lente</option>
+        <option value="650" selected>Normale</option>
+        <option value="350">Rapide</option>
+      </select>
+    </label>
+  </div>
+  <div class="hc-figures">
+    <section class="hc-figure hc-scatter-figure">
+      <h3>Groupes dans le plan</h3>
+      <div id="hc-scatter" class="chart" aria-label="Observations réparties en groupes"></div>
+    </section>
+    <section class="hc-figure hc-tree-figure">
+      <h3>Dendrogramme des fusions</h3>
+      <div id="hc-tree" class="chart" aria-label="Dendrogramme construit progressivement"></div>
+    </section>
+  </div>
+  <p class="hc-tree-hint"><strong>Ligne orange :</strong> après construction, faites-la glisser verticalement pour choisir la coupe, ou modifiez K. En mode « Ordre des fusions », les niveaux sont régulièrement espacés et ne représentent pas les distances. Pour lire les coûts, sélectionnez « Linéaire ».</p>
+  <div class="stats" aria-live="off">
+    <div><span>Groupes actuels</span><strong id="hc-group-count">24</strong></div>
+    <div><span>Fusions réalisées</span><strong id="hc-step-count">0 / 23</strong></div>
+    <div><span id="hc-cost-label">Dernier coût de fusion</span><strong id="hc-cost">—</strong></div>
+  </div>
+  <div class="hc-timeline"><label for="hc-progress">Parcourir les fusions</label><input id="hc-progress" type="range" min="0" max="23" value="0"><output id="hc-progress-value">0</output></div>
+  <p id="hc-message" class="lab-help" aria-live="polite">Chargement…</p>
+  <section class="hc-silhouette" aria-label="Silhouette moyenne en fonction du nombre de groupes">
+    <div class="hc-silhouette-heading">
+      <div><h3>Choisir K avec la silhouette</h3>
+        <p class="small">Cliquez sur un point pour comparer les découpages (K de 2 à 10). Une silhouette plus élevée suggère des groupes plus cohérents et mieux séparés.</p></div>
+      <div class="hc-silhouette-values"><span>Silhouette pour K choisi</span><strong id="hc-silhouette-score">—</strong><span id="hc-best-k">—</span></div>
+    </div>
+    <div id="hc-silhouette" class="chart hc-silhouette-chart"></div>
+    <p id="hc-cut-note" class="small"></p>
+  </section>
+  <p class="small" id="hc-metric-explain">Avec Ward, la hauteur d'une fusion représente l'augmentation d'inertie qu'elle provoque.</p>
+  
+</div>
+<div class="note"><strong>À observer :</strong> exécutez d'abord Ward, puis recommencez avec Single sur les mêmes données. Quelles fusions diffèrent ? Comment le choix de la liaison modifie-t-il la forme des groupes et celle du dendrogramme ?</div>
+
+<h2>5. Comment choisir le nombre de groupes ?</h2>
+<p>La hiérarchie complète permet d’essayer <strong>plusieurs coupes sans recalculer les fusions</strong>. Une coupe horizontale traverse autant de branches qu’il reste de groupes. Le curseur K et la ligne orange modifient simultanément la coupe et les couleurs du nuage de points.</p>
+<p>La <strong>silhouette moyenne</strong> est calculée pour chaque partition de K = 2 à K = 10. Une valeur élevée suggère que les observations sont proches de leur groupe et éloignées des autres. Toutefois, la meilleure silhouette n’est pas nécessairement le meilleur choix pour un problème réel.</p>
+<p>Une autre approche consiste à rechercher un grand saut entre deux hauteurs de fusion, <strong>en échelle linéaire</strong>. Il faut également tenir compte de l’interprétation des groupes, de leur stabilité et du contexte de l’application.</p>
+<div class="note"><strong>À expérimenter :</strong> construisez l’arbre avec Ward, puis comparez K = 2, K = 3 et le K maximisant la silhouette. Les mêmes choix sont-ils obtenus avec Single ? Quelles partitions semblent les plus pertinentes au vu du nuage de points ?</div>
+
+<h2>6. Comment lire le dendrogramme ?</h2>
+<p>Chaque extrémité en bas représente une observation. Lorsque deux branches se rejoignent, les groupes qu'elles représentent fusionnent. En échelle linéaire, plus la jonction est haute, plus le <strong>coût de la fusion</strong> est important. En mode « Ordre des fusions », la hauteur indique uniquement la chronologie des regroupements. Une coupe horizontale de l'arbre permet de former une partition.</p>
+<p><strong>Attention :</strong> avec Single, Complete et Average, la hauteur correspond à une distance euclidienne entre groupes, définie par le critère de liaison ; avec Ward, elle correspond ici à l'<strong>augmentation d'inertie</strong> (en unités au carré). Ne comparez pas directement les hauteurs de Ward à celles des trois autres liaisons.</p>
+
+<h2>7. Avantages et limites</h2>
+<div class="proscons"><div><h3>Avantages</h3><ul><li>Propose plusieurs niveaux de partition sans relancer l'algorithme.</li><li>Produit un dendrogramme aidant à interpréter les regroupements.</li><li>Permet de comparer des critères de liaison différents.</li></ul></div><div><h3>Limites</h3><ul><li>Les fusions sont irréversibles dans l'approche agglomérative.</li><li>Peut être coûteux en mémoire et en temps pour de grands jeux de données.</li><li>Sensible au prétraitement, à la distance et au critère de liaison.</li></ul></div></div>
+
+<h2>8. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Pourquoi les premières fusions d'un clustering agglomératif sont-elles irréversibles ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>À chaque étape, la méthode remplace deux groupes par leur union. Elle ne revient pas sur cette décision ; les fusions ultérieures dépendent donc de celles qui ont déjà été réalisées.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Quelle différence observe-t-on entre les liaisons Single et Complete ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Single retient la distance entre les points les plus proches des deux groupes ; elle peut créer des chaînes. Complete s&#x27;appuie sur la paire la plus éloignée et privilégie des groupes relativement compacts.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Pourquoi déplacer la coupe du dendrogramme change-t-il le nombre de groupes ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Chaque niveau horizontal correspond à un seuil de fusion. En coupant plus bas, on conserve davantage de groupes séparés ; en coupant plus haut, on accepte plus de fusions et le nombre de groupes diminue.</p></div>
+</details>
+</div>
+</div>
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content">
+<h3>Exemple : calculer les critères de liaison</h3>
+<p>Considérons six observations situées sur un même axe, de coordonnée verticale nulle :</p>
+<div class="comparison-table"><table>
+  <thead><tr><th>Observation</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+  <tbody><tr><th>Coordonnées (x, y)</th><td>(0, 0)</td><td>(1, 0)</td><td>(2, 0)</td><td>(8, 0)</td><td>(9, 0)</td><td>(10, 0)</td></tr></tbody>
+</table></div>
+
+<p>À un moment de la construction de la hiérarchie, supposons qu’il faille comparer deux groupes : <span class="math">G₁ = {A, B}</span> et <span class="math">G₂ = {C}</span>. Les distances euclidiennes entre les points des deux groupes sont :</p>
+<p class="math" style="text-align:center;font-size:17px">d(A, C) = 2 &nbsp; ; &nbsp; d(B, C) = 1</p>
+<h3>1. Définir la dissimilarité entre deux groupes</h3>
+<p>Soient deux groupes <span class="math">G₁</span> et <span class="math">G₂</span>. Le critère de liaison détermine comment mesurer leur proximité :</p>
+<div class="comparison-table"><table>
+<thead><tr><th>Critère</th><th>Formule générale</th><th>Application à l’exemple</th></tr></thead>
+<tbody>
+<tr><td><strong>Single</strong></td><td><span class="math">D(G₁,G₂) = min<sub>x∈G₁,y∈G₂</sub> d(x,y)</span></td><td><span class="math">min(2,1) = <strong>1</strong></span></td></tr>
+<tr><td><strong>Complete</strong></td><td><span class="math">D(G₁,G₂) = max<sub>x∈G₁,y∈G₂</sub> d(x,y)</span></td><td><span class="math">max(2,1) = <strong>2</strong></span></td></tr>
+<tr><td><strong>Average</strong></td><td><span class="math">D(G₁,G₂) = [1/(|G₁| |G₂|)] ∑<sub>x∈G₁</sub> ∑<sub>y∈G₂</sub> d(x,y)</span></td><td><span class="math">(2+1)/(2×1) = <strong>1,5</strong></span></td></tr>
+</tbody></table></div>
+<p>Les trois critères utilisent ici la distance euclidienne entre observations, mais <strong>ne mesurent pas la proximité des groupes de la même manière</strong>.</p>
+<h3>2. Comprendre le critère de Ward</h3>
+<p>Ward ne prend ni la plus petite ni la plus grande distance entre points. Il choisit la fusion qui augmente le moins la <strong>somme des carrés intra-groupes</strong> :</p>
+<p class="math" style="text-align:center;font-size:17px">Δ(G₁,G₂) = [|G₁| |G₂| / (|G₁| + |G₂|)] ‖μ₁ − μ₂‖²</p>
+<p>Avec <span class="math">|G₁| = 2</span>, <span class="math">|G₂| = 1</span>, <span class="math">μ₁ = (0,5 ; 0)</span> et <span class="math">μ₂ = (2 ; 0)</span> :</p>
+<p class="math" style="text-align:center;font-size:17px"><strong>Δ(G₁,G₂) = [2×1/(2+1)] × (2−0,5)² = 1,5</strong></p>
+<p>On peut vérifier ce résultat directement. Avant la fusion, l’inertie de <span class="math">{A, B}</span> est <span class="math">0,5</span> et celle de <span class="math">{C}</span> est nulle. Après la fusion, le groupe <span class="math">{A, B, C}</span> a pour centre 1 et son inertie vaut <span class="math">(0−1)²+(1−1)²+(2−1)² = 2</span>.</p>
+<p class="math" style="text-align:center;font-size:17px"><strong>Augmentation = 2 − 0,5 = 1,5</strong></p>
+<p><strong>Attention :</strong> les valeurs de Ward sont des <strong>augmentations d’inertie</strong>, exprimées en unités au carré. On ne peut pas interpréter directement leurs hauteurs comme les distances de Single ou Complete. Cette augmentation constitue le coût de fusion de Ward.</p>
+<h3>3. Découper le dendrogramme en K groupes</h3>
+<p>Pour <span class="math">n</span> observations, l’algorithme construit <span class="math">n − 1</span> fusions pour obtenir un seul groupe. Une coupe qui conserve <span class="math">K</span> groupes correspond à <span class="math">n − K</span> fusions réalisées.</p>
+<p>Avec nos six observations, un découpage en <span class="math">K = 2</span> groupes correspond donc à <span class="math">6 − 2 = 4</span> fusions. Pour ces données, on obtient naturellement les ensembles <span class="math">{A,B,C}</span> et <span class="math">{D,E,F}</span>.</p>
+<p>Pour étudier les grands écarts entre coûts de fusion, choisissez une <strong>échelle de hauteur réelle</strong> (linéaire). Le mode « Ordre des fusions » répartit les étapes régulièrement : il facilite la lecture, mais ne représente pas les écarts réels entre les coûts.</p>
+</div></details>
+<section class="references"><h2>Références</h2><ol>
+<li><a href="https://doi.org/10.1080/01621459.1963.10500845" target="_blank" rel="noopener">Ward (1963), <em>Hierarchical Grouping to Optimize an Objective Function</em></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/clustering.html#hierarchical-clustering" target="_blank" rel="noopener">scikit-learn, <em>Hierarchical clustering</em></a>.</li>
+<li><a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html" target="_blank" rel="noopener">SciPy, <em>Hierarchical clustering: linkage</em></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/clustering.html#silhouette-coefficient" target="_blank" rel="noopener">scikit-learn, <em>Silhouette coefficient</em></a>.</li>
+</ol></section>
+</article>
+<footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/hierarchique-loader.js"></script>
+</body>
+</html>

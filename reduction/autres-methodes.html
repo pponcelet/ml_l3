@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>t-SNE et UMAP — Apprentissage automatique</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body class="reduction-page" data-root="../">
+<aside class="sidebar" id="sidebar" aria-label="Navigation du cours"></aside>
+<main id="content" tabindex="-1">
+<article class="course-page">
+<div class="eyebrow">APPRENTISSAGE NON SUPERVISÉ · RÉDUCTION DE DIMENSION</div>
+<h1>t-SNE et UMAP</h1>
+<p class="lead">Représenter des observations dans un espace de faible dimension en privilégiant la conservation des voisinages.</p>
+
+<h2>1. Principe</h2>
+<p>L’ACP recherche des directions linéaires qui conservent un maximum de variance. <strong>t-SNE</strong> et <strong>UMAP</strong> recherchent plutôt une nouvelle disposition des observations pour que des points proches dans l’espace initial restent, autant que possible, proches dans une représentation de faible dimension.</p>
+<p>Ces méthodes sont utiles pour explorer des données dont les relations sont <strong>non linéaires</strong>. La représentation obtenue n’est pas la projection orthogonale sur un plan, contrairement à l’ACP.</p>
+
+<h2>2. Méthodes</h2>
+<div class="concept-grid">
+  <div class="concept"><strong>t-SNE</strong>
+    <p>Transforme les similarités entre observations en probabilités, puis recherche une disposition de faible dimension qui préserve les voisinages les plus importants.</p>
+    <p class="small">La <strong>perplexité</strong> contrôle l’échelle des voisinages considérés.</p>
+  </div>
+  <div class="concept"><strong>UMAP</strong>
+    <p>Construit un graphe de voisinage pondéré, puis recherche une disposition de faible dimension qui conserve au mieux ses relations locales.</p>
+    <p class="small"><strong>n_neighbors</strong> règle la taille du voisinage ; <strong>min_dist</strong> agit sur la compacité de la représentation.</p>
+  </div>
+</div>
+
+<h2>3. Expérimentation</h2>
+<div class="lab mf-lab" id="manifold-lab">
+  <div class="mf-controls">
+    <label for="mf-dataset">Jeu de données
+      <select id="mf-dataset">
+        <option value="swiss">Rouleau suisse</option>
+        <option value="s_curve">Courbe en S</option>
+        <option value="blobs">Trois groupes</option>
+      </select>
+    </label>
+    <label for="mf-perplexity">Perplexité t-SNE
+      <select id="mf-perplexity">
+        <option value="10">10</option>
+        <option value="25" selected>25</option>
+        <option value="40">40</option>
+      </select>
+    </label>
+    <label for="mf-neighbors">Voisins UMAP
+      <select id="mf-neighbors">
+        <option value="8">8</option>
+        <option value="16" selected>16</option>
+        <option value="30">30</option>
+      </select>
+    </label>
+    <label for="mf-min-dist">Distance minimale UMAP
+      <select id="mf-min-dist">
+        <option value="0.1" selected>0,1</option>
+        <option value="0.5">0,5</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="mf-hint-row">
+    <p id="mf-caption">Une surface enroulée dans l’espace 3D. Les couleurs repèrent la position des observations le long du rouleau.</p>
+    <button type="button" class="btn ghost" id="mf-reset-camera">Réinitialiser la vue 3D</button>
+  </div>
+
+  <div class="mf-panels">
+    <section class="mf-card" aria-label="Observations initiales en trois dimensions">
+      <h3>Données initiales — 3D</h3>
+      <div class="chart" id="mf-origin-chart"></div>
+      <p class="mf-panel-caption">Faites glisser pour tourner le nuage.</p>
+    </section>
+    <section class="mf-card" aria-label="Projection t-SNE en deux dimensions">
+      <h3>t-SNE — 2D</h3>
+      <div class="chart" id="mf-tsne-chart"></div>
+      <p class="mf-panel-caption">Nouvelle disposition des mêmes points.</p>
+    </section>
+    <section class="mf-card" aria-label="Projection UMAP en deux dimensions">
+      <h3>UMAP — 2D</h3>
+      <div class="chart" id="mf-umap-chart"></div>
+      <p class="mf-panel-caption">Nouvelle disposition des mêmes points.</p>
+    </section>
+  </div>
+
+  <div class="mf-stats" aria-live="polite">
+    <div><span>Points affichés</span><strong id="mf-count">—</strong></div>
+    <div><span>Voisins conservés par t-SNE</span><strong id="mf-tsne-recall">—</strong></div>
+    <div><span>Voisins conservés par UMAP</span><strong id="mf-umap-recall">—</strong></div>
+  </div>
+  <p class="mf-stat-explain">La proportion de voisins conservés mesure combien des 8 plus proches voisins de chaque point en 3D se retrouvent parmi ses 8 plus proches voisins en 2D. Les axes 2D n’ont pas d’interprétation directe.</p>
+  <p class="small" id="mf-umap-note">La représentation UMAP utilise ici une optimisation simplifiée des relations de voisinage : elle illustre le principe de la méthode, mais ne reproduit pas exactement les résultats de l’algorithme UMAP de référence.</p>
+  <div class="mf-observation" aria-live="polite">
+    <strong>À observer</strong>
+    <p id="mf-observe">Suivez les couleurs dans les trois vues : quelles relations de voisinage sont conservées lorsque le rouleau se déplie ?</p>
+    <p id="mf-selected">Survolez ou cliquez sur un point pour le retrouver dans les trois graphiques.</p>
+  </div>
+</div>
+
+<h2>4. Avantages et limites</h2>
+<div class="comparison-table"><table>
+<thead><tr><th>Méthode</th><th>Atout principal</th><th>Point de vigilance</th></tr></thead>
+<tbody>
+<tr><td><strong>t-SNE</strong></td><td>Visualisation des relations de voisinage locales.</td><td>Les distances entre groupes et leurs tailles apparentes ne doivent pas être interprétées comme dans l’espace d’origine.</td></tr>
+<tr><td><strong>UMAP</strong></td><td>Représentation des voisinages avec un compromis entre structure locale et organisation générale.</td><td>La forme obtenue dépend des paramètres, des données et de la métrique utilisée.</td></tr>
+</tbody></table></div>
+<p class="note"><strong>À retenir :</strong> l’apparition de groupes bien séparés sur un graphique 2D n’est pas une preuve qu’ils étaient séparés dans l’espace initial. Une représentation doit toujours être interprétée au regard des données et des paramètres utilisés.</p>
+
+<h2>5. Questions pour réfléchir</h2>
+<div class="qa-list">
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">1.</span> Les mêmes points restent-ils voisins après le passage de 3D à 2D ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Pas tous. Ces méthodes cherchent surtout à conserver des voisinages, mais le passage en 2D impose des compromis. Des voisins initiaux peuvent être éloignés et des points initialement distants peuvent devenir proches sur la carte.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">2.</span> Avec le rouleau suisse, pourquoi deux points proches en distance euclidienne peuvent-ils se trouver sur deux tours différents de la surface ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>Le rouleau suisse replie une surface sur elle-même : deux tours peuvent passer près l&#x27;un de l&#x27;autre dans l&#x27;espace 3D. Pourtant, les points correspondants peuvent être éloignés si l&#x27;on suit la surface ; la distance euclidienne ne représente donc pas toujours le voisinage intrinsèque.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">3.</span> Quel est l’effet d’une augmentation de la perplexité pour t-SNE ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Une perplexité plus élevée fait généralement intervenir un voisinage effectif plus large dans les similarités de départ. La disposition peut devenir moins centrée sur des détails très locaux, mais l&#x27;effet visuel précis dépend des données et de l&#x27;optimisation.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">4.</span> Que constatez-vous lorsque vous augmentez <i>n_neighbors</i> ou <i>min_dist</i> pour UMAP ?</p>
+<details class="qa-answer">
+<summary>Éléments de réponse</summary>
+<div class="qa-answer-content"><p>Augmenter n_neighbors donne davantage de poids à une structure de voisinage plus étendue. Augmenter min_dist limite généralement le resserrement des points dans la représentation. Il faut comparer les vues plutôt que s&#x27;attendre à un changement identique sur tous les jeux.</p></div>
+</details>
+</div>
+<div class="qa-item">
+<p class="qa-question"><span class="qa-number">5.</span> Pourquoi n’y a-t-il pas de plan de projection sur les graphiques t-SNE et UMAP ?</p>
+<details class="qa-answer">
+<summary>Voir la réponse</summary>
+<div class="qa-answer-content"><p>t-SNE et UMAP construisent de nouvelles coordonnées en 2D pour préserver certaines relations entre points. Il ne s&#x27;agit pas d&#x27;une projection orthogonale sur un unique plan 3D, contrairement à la réduction 3D → 2D illustrée pour l&#x27;ACP.</p></div>
+</details>
+</div>
+</div>
+
+<details class="further"><summary>Pour aller plus loin — formalisation mathématique</summary>
+<div class="detail-content">
+<h3>1. Les données et leur représentation</h3>
+<p>Soit <span class="math">X = {x<sub>1</sub>, …, x<sub>n</sub>}</span> un ensemble de <span class="math">n</span> observations dans <span class="math">ℝ<sup>p</sup></span>. L’objectif est de calculer des représentations <span class="math">Y = {y<sub>1</sub>, …, y<sub>n</sub>}</span> dans <span class="math">ℝ<sup>2</sup></span>. Dans l’expérimentation, <span class="math">p = 3</span>.</p>
+
+<h3>2. t-SNE : préserver des probabilités de voisinage</h3>
+<p>t-SNE associe aux observations des probabilités symétriques <span class="math">p<sub>ij</sub></span> dans l’espace initial et <span class="math">q<sub>ij</sub></span> dans l’espace réduit. La méthode recherche des coordonnées 2D qui minimisent la divergence de Kullback–Leibler :</p>
+<div class="mf-formula"><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>KL</mi><mo>(</mo><mi>P</mi><mo>∥</mo><mi>Q</mi><mo>)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mi>i</mi><mo>≠</mo><mi>j</mi></mrow></munder><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>ln</mo><mo>(</mo><mfrac><msub><mi>p</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mfrac><mo>)</mo></mrow></math></div>
+<p>Par exemple, si deux observations ont une similarité probabiliste <span class="math">p<sub>ij</sub> = 0,12</span> dans l’espace initial et <span class="math">q<sub>ij</sub> = 0,08</span> en 2D, leur contribution à la somme est :</p>
+<div class="mf-formula"><span class="math">0,12 × ln(0,12 / 0,08) ≈ 0,049.</span></div>
+<p>Le critère total dépend de <strong>toutes les paires</strong>. Une mauvaise conservation des voisins fortement similaires est davantage pénalisée.</p>
+
+<h3>3. UMAP : préserver des liens dans un graphe</h3>
+<p>UMAP attribue une intensité <span class="math">p<sub>ij</sub> ∈ [0, 1]</span> à chaque relation de voisinage dans l’espace initial, puis une intensité <span class="math">q<sub>ij</sub> ∈ (0, 1)</span> dans la représentation 2D. Il minimise une entropie croisée (à une constante près) :</p>
+<div class="mf-formula"><span class="math">L = −∑<sub>i,j</sub> [ p<sub>ij</sub> ln(q<sub>ij</sub>) + (1 − p<sub>ij</sub>) ln(1 − q<sub>ij</sub>) ].</span></div>
+<p>Pour un lien de poids <span class="math">p<sub>ij</sub> = 0,8</span>, la contribution à la perte vaut, si <span class="math">q<sub>ij</sub> = 0,6</span> :</p>
+<div class="mf-formula"><span class="math">−[0,8 × ln(0,6) + 0,2 × ln(0,4)] ≈ 0,592.</span></div>
+<p>En prenant <span class="math">q<sub>ij</sub> = 0,8</span>, elle descend à environ <span class="math">0,500</span>. L’algorithme favorise ainsi les dispositions dont les relations locales ressemblent à celles du graphe initial.</p>
+
+<h3>4. Différence avec l’ACP</h3>
+<p>En ACP, les nouvelles coordonnées sont obtenues par une transformation linéaire, <span class="math">Y = XU</span>. t-SNE et UMAP optimisent directement les positions des points en 2D selon leurs relations de voisinage : il n’existe généralement pas de plan 2D fixe sur lequel tous les points seraient projetés orthogonalement.</p>
+</div></details>
+
+<section class="references"><h2>Références</h2><ol>
+<li>van der Maaten et Hinton (2008), <a href="https://www.jmlr.org/papers/v9/vandermaaten08a.html" target="_blank" rel="noopener"><i>Visualizing Data using t-SNE</i></a>.</li>
+<li>McInnes, Healy et Melville (2018), <a href="https://arxiv.org/abs/1802.03426" target="_blank" rel="noopener"><i>UMAP: Uniform Manifold Approximation and Projection for Dimension Reduction</i></a>.</li>
+<li><a href="https://scikit-learn.org/stable/modules/manifold.html" target="_blank" rel="noopener">scikit-learn, <i>Manifold learning</i></a>.</li>
+</ol></section>
+</article><footer class="footer">Apprentissage automatique</footer>
+</main>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/manifold-data.js"></script>
+<script src="../assets/js/manifold.js"></script>
+</body>
+</html>
